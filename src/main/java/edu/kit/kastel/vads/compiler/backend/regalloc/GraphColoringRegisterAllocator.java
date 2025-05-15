@@ -1,0 +1,94 @@
+package edu.kit.kastel.vads.compiler.backend.regalloc;
+
+import java.util.*;
+
+/**
+ * 基于图着色的寄存器分配器。
+ */
+public class GraphColoringRegisterAllocator {
+    // 可用的物理寄存器名（x86-64）
+    private static final String[] PHYSICAL_REGS = {
+        "%rax", "%rbx", "%rcx", "%rdx", "%rsi", "%rdi", "%r8", "%r9"
+    };
+
+    /**
+     * 输入aasm指令列表，输出虚拟寄存器到物理寄存器的分配结果。
+     */
+    public Map<String, String> allocate(List<String> aasmLines) {
+        Set<String> virtualRegs = collectVirtualRegisters(aasmLines);
+        InterferenceGraph graph = buildInterferenceGraph(aasmLines, virtualRegs);
+        return colorGraph(graph);
+    }
+
+    // 收集所有虚拟寄存器名
+    private Set<String> collectVirtualRegisters(List<String> lines) {
+        Set<String> regs = new HashSet<>();
+        for (String line : lines) {
+            for (String token : line.split("[ =]+")) {
+                if (token.matches("r\\d+")) {
+                    regs.add(token);
+                }
+            }
+        }
+        return regs;
+    }
+
+    // 构建冲突图（活跃分析，简化版：每条指令的目标与同一基本块内其它活跃寄存器冲突）
+    private InterferenceGraph buildInterferenceGraph(List<String> lines, Set<String> regs) {
+        InterferenceGraph graph = new InterferenceGraph();
+        for (String reg : regs) graph.addNode(reg);
+        // 活跃分析（简化：顺序扫描，维护活跃集合）
+        Set<String> live = new HashSet<>();
+        ListIterator<String> it = lines.listIterator(lines.size());
+        while (it.hasPrevious()) {
+            String line = it.previous();
+            String[] parts = line.trim().split("[ =]+");
+            String def = null;
+            Set<String> uses = new HashSet<>();
+            if (parts.length > 0 && parts[0].matches("r\\d+")) {
+                def = parts[0];
+            }
+            for (int i = 1; i < parts.length; i++) {
+                if (parts[i].matches("r\\d+")) {
+                    uses.add(parts[i]);
+                }
+            }
+            // def与live中所有冲突
+            if (def != null) {
+                for (String l : live) {
+                    graph.addEdge(def, l);
+                }
+                live.remove(def);
+            }
+            live.addAll(uses);
+        }
+        return graph;
+    }
+
+    // 图着色算法（贪心）
+    private Map<String, String> colorGraph(InterferenceGraph graph) {
+        Map<String, String> allocation = new HashMap<>();
+        List<String> regs = new ArrayList<>(graph.getNodes());
+        regs.sort(Comparator.comparingInt(graph::degree).reversed());
+        for (String reg : regs) {
+            Set<String> neighborColors = new HashSet<>();
+            for (String neighbor : graph.getNeighbors(reg)) {
+                if (allocation.containsKey(neighbor)) {
+                    neighborColors.add(allocation.get(neighbor));
+                }
+            }
+            String assigned = null;
+            for (String phys : PHYSICAL_REGS) {
+                if (!neighborColors.contains(phys)) {
+                    assigned = phys;
+                    break;
+                }
+            }
+            if (assigned == null) {
+                throw new RuntimeException("寄存器溢出：物理寄存器数量不足");
+            }
+            allocation.put(reg, assigned);
+        }
+        return allocation;
+    }
+} 

@@ -1,6 +1,8 @@
 package edu.kit.kastel.vads.compiler;
 
 import edu.kit.kastel.vads.compiler.backend.aasm.CodeGenerator;
+import edu.kit.kastel.vads.compiler.backend.regalloc.GraphColoringRegisterAllocator;
+import edu.kit.kastel.vads.compiler.backend.regalloc.AasmToAttAsmTranslator;
 import edu.kit.kastel.vads.compiler.ir.IrGraph;
 import edu.kit.kastel.vads.compiler.ir.SsaTranslation;
 import edu.kit.kastel.vads.compiler.ir.optimize.LocalValueNumbering;
@@ -18,6 +20,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class Main {
@@ -44,7 +47,7 @@ public class Main {
 
         if ("vcg".equals(System.getenv("DUMP_GRAPHS")) || "vcg".equals(System.getProperty("dumpGraphs"))) {
             Path tmp = output.toAbsolutePath().resolveSibling("graphs");
-            Files.createDirectory(tmp);
+            Files.createDirectories(tmp);
             for (IrGraph graph : graphs) {
                 dumpGraph(graph, tmp, "before-codegen", "vcg");
             }
@@ -52,15 +55,20 @@ public class Main {
 
         if ("dot".equals(System.getenv("DUMP_GRAPHS")) || "dot".equals(System.getProperty("dumpGraphs"))) {
             Path tmp = output.toAbsolutePath().resolveSibling("graphs");
-            Files.createDirectory(tmp);
+            Files.createDirectories(tmp);
             for (IrGraph graph : graphs) {
                 dumpGraph(graph, tmp, "before-codegen", "dot");
             }
         }
 
         // TODO: generate assembly and invoke gcc instead of generating abstract assembly
-        String s = new CodeGenerator().generateCode(graphs);
-        Files.writeString(output, s);
+        String aasm = new CodeGenerator().generateCode(graphs);
+        List<String> aasmLines = Arrays.asList(aasm.split("\n"));
+        GraphColoringRegisterAllocator allocator = new GraphColoringRegisterAllocator();
+        java.util.Map<String, String> regMap = allocator.allocate(aasmLines);
+        AasmToAttAsmTranslator translator = new AasmToAttAsmTranslator();
+        String attAsm = translator.translate(aasmLines, regMap);
+        Files.writeString(output, attAsm);
     }
 
     private static ProgramTree lexAndParse(Path input) throws IOException {
