@@ -25,7 +25,7 @@ public class GraphColoringRegisterAllocator {
         Set<String> regs = new HashSet<>();
         for (String line : lines) {
             for (String token : line.split("[ =]+")) {
-                if (token.matches("r\\d+")) {
+                if (token.matches("%\\d+")) {
                     regs.add(token);
                 }
             }
