@@ -68,7 +68,25 @@ public class Main {
         java.util.Map<String, String> regMap = allocator.allocate(aasmLines);
         AasmToAttAsmTranslator translator = new AasmToAttAsmTranslator();
         String attAsm = translator.translate(aasmLines, regMap);
-        Files.writeString(output, attAsm);
+        // 写入临时汇编文件
+        Path asmFile = output.resolveSibling(output.getFileName().toString() + ".s");
+        Files.writeString(asmFile, attAsm);
+        // 调用gcc编译汇编为可执行文件
+        try {
+            Process gcc = new ProcessBuilder(
+                "gcc", "-no-pie", "-o", output.toString(), asmFile.toString()
+            ).inheritIO().start();
+            int exitCode = gcc.waitFor();
+            if (exitCode != 0) {
+                System.err.println("gcc 编译失败，退出码: " + exitCode);
+                System.exit(8);
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IOException("gcc 调用被中断", e);
+        }
+        // 可选：删除临时汇编文件
+        // Files.deleteIfExists(asmFile);
     }
 
     private static ProgramTree lexAndParse(Path input) throws IOException {
