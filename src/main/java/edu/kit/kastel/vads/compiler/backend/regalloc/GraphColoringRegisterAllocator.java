@@ -1,14 +1,13 @@
 package edu.kit.kastel.vads.compiler.backend.regalloc;
-
 import java.util.*;
 
 /**
  * 基于图着色的寄存器分配器。
  */
 public class GraphColoringRegisterAllocator {
-    // 可用的物理寄存器名（x86-64）
     private static final String[] PHYSICAL_REGS = {
-        "%rax", "%rbx", "%rcx", "%rdx", "%rsi", "%rdi", "%r8", "%r9"
+        Register.RAX, Register.RBX, Register.RCX, Register.RDX, Register.RSI, Register.RDI, 
+        Register.R8, Register.R9, Register.R10, Register.R11, Register.R12, Register.R13, Register.R14, Register.R15
     };
 
     /**
@@ -45,11 +44,11 @@ public class GraphColoringRegisterAllocator {
             String[] parts = line.trim().split("[ =]+");
             String def = null;
             Set<String> uses = new HashSet<>();
-            if (parts.length > 0 && parts[0].matches("r\\d+")) {
+            if (parts.length > 0 && parts[0].matches("%\\d+")) {
                 def = parts[0];
             }
             for (int i = 1; i < parts.length; i++) {
-                if (parts[i].matches("r\\d+")) {
+                if (parts[i].matches("%\\d+")) {
                     uses.add(parts[i]);
                 }
             }
