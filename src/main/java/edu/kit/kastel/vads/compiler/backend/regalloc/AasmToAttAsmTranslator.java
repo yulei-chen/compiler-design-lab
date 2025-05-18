@@ -85,7 +85,10 @@ public class AasmToAttAsmTranslator {
             String[] srcs = parts[1].trim().split(" ");
             String src1 = regMap.getOrDefault(srcs[0], srcs[0]);
             String src2 = regMap.getOrDefault(srcs[1], srcs[1]);
-            // mov src1, dst; imul src2, dst
+            if (dst.equals(src2)) {
+                return String.format("    imulq %s, %s", src1, dst);
+            }
+            // dst = src1 * src2
             return String.format("    movq %s, %s\n    imulq %s, %s", src1, dst, src2, dst);
         }
         if (line.contains(" = div ")) {
