@@ -103,6 +103,9 @@ public class AasmToAttAsmTranslator {
             String dividend = regMap.getOrDefault(srcs[0], srcs[0]);
             String divisor = regMap.getOrDefault(srcs[1], srcs[1]);
             // mov dividend, %rax; cqto; idiv divisor; mov %rax, dst
+            if (dst.equals("%rax")) {
+                return String.format("    movq %s, %%rax\n    cqto\n    idivq %s", dividend, divisor);
+            }
             return String.format("    pushq %%rax\n    movq %s, %%rax\n    cqto\n    idivq %s\n    movq %%rax, %s\n    popq %%rax", dividend, divisor, dst);
         }
         if (line.contains(" = mod ")) {
@@ -114,6 +117,9 @@ public class AasmToAttAsmTranslator {
             String dividend = regMap.getOrDefault(srcs[0], srcs[0]);
             String divisor = regMap.getOrDefault(srcs[1], srcs[1]);
             // mov dividend, %rax; cqto; idiv divisor; mov %rdx, dst
+            if (dst.equals("%rdx")) {
+                return String.format("    pushq %%rax\n    movq %s, %%rax\n    cqto\n    idivq %s\n  popq %%rax", dividend, divisor);
+            }
             return String.format("    pushq %%rax\n    pushq %%rdx\n    movq %s, %%rax\n    cqto\n    idivq %s\n    movq %%rdx, %s\n    popq %%rdx\n    popq %%rax", dividend, divisor, dst);
         }
         // 其它情况直接忽略                             
