@@ -59,9 +59,11 @@ public class AasmToAttAsmTranslator {
             String[] srcs = parts[1].trim().split(" ");
             String src1 = regMap.getOrDefault(srcs[0], srcs[0]);
             String src2 = regMap.getOrDefault(srcs[1], srcs[1]);
+            // movq src1 dst may cover src2 if dst == src2
             if (dst.equals(src2)) {
                 return String.format("    addq %s, %s", src1, dst);
             }
+            // dst = src1 + src2
             return String.format("    movq %s, %s\n    addq %s, %s", src1, dst, src2, dst);
         }
         if (line.contains(" = sub ")) {
@@ -70,6 +72,11 @@ public class AasmToAttAsmTranslator {
             String[] srcs = parts[1].trim().split(" ");
             String src1 = regMap.getOrDefault(srcs[0], srcs[0]);
             String src2 = regMap.getOrDefault(srcs[1], srcs[1]);
+            // movq src1 dst may cover src2 if dst == src2
+            if (dst.equals(src2)) {
+                return String.format("    subq %s, %s\n    negq %s", src1, dst, dst);
+            }
+            // dst = src1 - src2
             return String.format("    movq %s, %s\n    subq %s, %s", src1, dst, src2, dst);
         }
         if (line.contains(" = mul ")) {
