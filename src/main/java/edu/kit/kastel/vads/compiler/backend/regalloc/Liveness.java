@@ -93,6 +93,11 @@ public class Liveness {
     /*** Predicates  */
 
     public boolean live(Integer lineNumber, String virtualReg) {
+        // Space/time trade off for recursive calls
+        if (liveIn.containsKey(lineNumber) && liveIn.get(lineNumber).contains(virtualReg)) {
+            return true;
+        }
+        
         // K1
         if (use(lineNumber, virtualReg)) {
             return true;
