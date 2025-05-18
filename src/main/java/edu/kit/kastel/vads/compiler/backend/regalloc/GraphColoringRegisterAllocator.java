@@ -13,6 +13,8 @@ public class GraphColoringRegisterAllocator {
         Register.R8D, Register.R9D, Register.R10D, Register.R11D, Register.R12D, Register.R13D, Register.R14D, Register.R15D
     };
 
+    public static int stackOffset = 0;
+
     /**
      * 输入aasm指令列表，输出虚拟寄存器到物理寄存器的分配结果。
      */
@@ -74,9 +76,12 @@ public class GraphColoringRegisterAllocator {
                 }
             }
             if (assigned == null) {
-                throw new RuntimeException("寄存器溢出：物理寄存器数量不足");
+                stackOffset += 4;
+                String stack = String.format("-%d(%%rsp)", stackOffset);
+                allocation.put(reg, stack);
+            } else {
+                allocation.put(reg, assigned);
             }
-            allocation.put(reg, assigned);
         }
         return allocation;
     }

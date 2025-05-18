@@ -23,6 +23,12 @@ public class AasmToAttAsmTranslator {
         sb.append("    movq $0x3C, %rax\n");
         sb.append("    syscall\n");
         sb.append("_main:\n");
+
+        // Allocate stack space for spilling
+        if (GraphColoringRegisterAllocator.stackOffset > 0) {
+            sb.append("    subq $").append(GraphColoringRegisterAllocator.stackOffset).append(", %rsp\n");
+        }
+
         // 生成原有的汇编代码
         for (String line : aasmLines) {
             String asm = translateLine(line.trim(), regMap);
@@ -45,7 +51,11 @@ public class AasmToAttAsmTranslator {
         if (line.startsWith("ret ")) {
             String[] parts = line.split(" ");
             String src = regMap.getOrDefault(parts[1], parts[1]);
-            return String.format("    movl %s, %%eax\n    ret", src);
+            
+            String mov = String.format("    movl %s, %%eax", src);
+            String deallocStack = GraphColoringRegisterAllocator.stackOffset > 0 ? String.format("    addq $%d, %%rsp", GraphColoringRegisterAllocator.stackOffset) : "";
+            String ret = String.format("    ret");
+            return String.format("%s\n%s\n%s", mov, deallocStack, ret);
         }
         if (line.contains(" = const ")) {
             String[] parts = line.split(" = const ");
