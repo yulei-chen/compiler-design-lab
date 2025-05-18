@@ -32,34 +32,21 @@ public class GraphColoringRegisterAllocator {
         return regs;
     }
 
-    // 构建冲突图（活跃分析，简化版：每条指令的目标与同一基本块内其它活跃寄存器冲突）
     private InterferenceGraph buildInterferenceGraph(List<String> lines, Set<String> regs) {
         InterferenceGraph graph = new InterferenceGraph();
         for (String reg : regs) graph.addNode(reg);
-        // 活跃分析（简化：顺序扫描，维护活跃集合）
-        Set<String> live = new HashSet<>();
-        ListIterator<String> it = lines.listIterator(lines.size());
-        while (it.hasPrevious()) {
-            String line = it.previous();
-            String[] parts = line.trim().split("[ =]+");
-            String def = null;
-            Set<String> uses = new HashSet<>();
-            if (parts.length > 0 && parts[0].matches("%\\d+")) {
-                def = parts[0];
-            }
-            for (int i = 1; i < parts.length; i++) {
-                if (parts[i].matches("%\\d+")) {
-                    uses.add(parts[i]);
+
+        Liveness liveness = new Liveness(lines);
+        HashMap<Integer, HashSet<String>> liveIn = liveness.backwardAnalyze();
+
+        for (Integer lineNumber : liveIn.keySet()) {
+            HashSet<String> liveRegsAtTheSameTime = liveIn.get(lineNumber);
+            for (String reg1 : liveRegsAtTheSameTime) {
+                for (String reg2 : liveRegsAtTheSameTime) {
+                    if (reg1.equals(reg2)) continue;
+                    graph.addEdge(reg1, reg2);
                 }
             }
-            // def与live中所有冲突
-            if (def != null) {
-                for (String l : live) {
-                    graph.addEdge(def, l);
-                }
-                live.remove(def);
-            }
-            live.addAll(uses);
         }
         return graph;
     }
