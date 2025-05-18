@@ -120,7 +120,7 @@ public class AasmToAttAsmTranslator {
             if (dst.equals("%rdx")) {
                 return String.format("    pushq %%rax\n    movq %s, %%rax\n    cqto\n    idivq %s\n  popq %%rax", dividend, divisor);
             }
-            return String.format("    pushq %%rax\n    pushq %%rdx\n    movq %s, %%rax\n    cqto\n    idivq %s\n    movq %%rdx, %s\n    popq %%rdx\n    popq %%rax", dividend, divisor, dst);
+            return String.format("    pushq %%rax\n    pushq %%rdx\n    movq %s, %%rax\n    cqto\n    idivq %s\n    popq %%rax\n    movq %%rdx, %s\n    popq %%rdx", dividend, divisor, dst);
         }
         // 其它情况直接忽略                             
         return null;
