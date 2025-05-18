@@ -45,13 +45,13 @@ public class AasmToAttAsmTranslator {
         if (line.startsWith("ret ")) {
             String[] parts = line.split(" ");
             String src = regMap.getOrDefault(parts[1], parts[1]);
-            return String.format("    movq %s, %%rax\n    ret", src);
+            return String.format("    movl %s, %%eax\n    ret", src);
         }
         if (line.contains(" = const ")) {
             String[] parts = line.split(" = const ");
             String dst = regMap.getOrDefault(parts[0].trim(), parts[0].trim());
             String imm = parts[1].trim();
-            return String.format("    movq $%s, %s", imm, dst);
+            return String.format("    movl $%s, %s", imm, dst);
         }
         if (line.contains(" = add ")) {
             // dst = src1 + src2
@@ -60,7 +60,7 @@ public class AasmToAttAsmTranslator {
             String[] srcs = parts[1].trim().split(" ");
             String src1 = regMap.getOrDefault(srcs[0], srcs[0]);
             String src2 = regMap.getOrDefault(srcs[1], srcs[1]);
-            return String.format("    movq %s, %%rax\n    addq %s, %%rax\n    movq %%rax, %s", src1, src2, dst);
+            return String.format("    movl %s, %%eax\n    addl %s, %%eax\n    movl %%eax, %s", src1, src2, dst);
         }
         if (line.contains(" = sub ")) {
             // dst = src1 - src2
@@ -69,7 +69,7 @@ public class AasmToAttAsmTranslator {
             String[] srcs = parts[1].trim().split(" ");
             String src1 = regMap.getOrDefault(srcs[0], srcs[0]);
             String src2 = regMap.getOrDefault(srcs[1], srcs[1]);
-            return String.format("    movq %s, %%rax\n    subq %s, %%rax\n    movq %%rax, %s", src1, src2, dst);
+            return String.format("    movl %s, %%eax\n    subl %s, %%eax\n    movl %%eax, %s", src1, src2, dst);
         }
         if (line.contains(" = mul ")) {
             // dst = src1 * src2
@@ -78,27 +78,27 @@ public class AasmToAttAsmTranslator {
             String[] srcs = parts[1].trim().split(" ");
             String src1 = regMap.getOrDefault(srcs[0], srcs[0]);
             String src2 = regMap.getOrDefault(srcs[1], srcs[1]);
-            return String.format("    movq %s, %%rax\n    imulq %s, %%rax\n    movq %%rax, %s", src1, src2, dst);
+            return String.format("    movl %s, %%eax\n    imull %s, %%eax\n    movl %%eax, %s", src1, src2, dst);
         }
         if (line.contains(" = div ")) {
             // dst = dividend / divisor
-            // ==> %rax = %rax / x
+            // ==> %eax = %eax / x
             String[] parts = line.split(" = div ");
             String dst = regMap.getOrDefault(parts[0].trim(), parts[0].trim());
             String[] srcs = parts[1].trim().split(" ");
             String dividend = regMap.getOrDefault(srcs[0], srcs[0]);
             String divisor = regMap.getOrDefault(srcs[1], srcs[1]);
-            return String.format("    movq %s, %%rax\n    cqto\n    idivq %s\n    movq %%rax, %s", dividend, divisor, dst);
+            return String.format("    movl %s, %%eax\n    cltd\n    idivl %s\n    movl %%eax, %s", dividend, divisor, dst);
         }
         if (line.contains(" = mod ")) {
             // dst = dividend % divisor
-            // ==> %rdx = %rax % x
+            // ==> %edx = %eax % x
             String[] parts = line.split(" = mod ");
             String dst = regMap.getOrDefault(parts[0].trim(), parts[0].trim());
             String[] srcs = parts[1].trim().split(" ");
             String dividend = regMap.getOrDefault(srcs[0], srcs[0]);
             String divisor = regMap.getOrDefault(srcs[1], srcs[1]);
-            return String.format("    movq %s, %%rax\n    cqto\n    idivq %s\n    movq %%rdx, %s", dividend, divisor, dst);
+            return String.format("    movl %s, %%eax\n    cltd\n    idivl %s\n    movl %%edx, %s", dividend, divisor, dst);
         }
         // 其它情况直接忽略                             
         return null;

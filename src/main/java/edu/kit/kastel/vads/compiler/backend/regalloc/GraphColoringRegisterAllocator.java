@@ -6,11 +6,11 @@ import java.util.*;
  */
 public class GraphColoringRegisterAllocator {
     private static final String[] PHYSICAL_REGS = {
-        // Register.RAX, 
-        Register.RBX, Register.RCX, 
-        // Register.RDX, 
-        Register.RSI, Register.RDI, 
-        Register.R8, Register.R9, Register.R10, Register.R11, Register.R12, Register.R13, Register.R14, Register.R15
+        // Register.EAX,
+        Register.EBX, Register.ECX, 
+        // Register.EDX, 
+        Register.ESI, Register.EDI,
+        Register.R8D, Register.R9D, Register.R10D, Register.R11D, Register.R12D, Register.R13D, Register.R14D, Register.R15D
     };
 
     /**
