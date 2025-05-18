@@ -3,18 +3,21 @@ package edu.kit.kastel.vads.compiler.backend.regalloc;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class Liveness {
 
     private List<String> lines;
+    private Set<String> virtualRegs;
     private HashMap<Integer, HashSet<String>> liveIn;
     private HashMap<Integer, HashSet<String>> defMap;
     private HashMap<Integer, HashSet<String>> useMap;
     private HashMap<Integer, HashSet<Integer>> succMap;
 
-    public Liveness(List<String> lines) {
+    public Liveness(List<String> lines, Set<String> regs) {
         this.lines = lines;
-        liveIn = new HashMap<>();
+        this.virtualRegs = regs;
+        liveIn = new HashMap<>();   
         defMap = new HashMap<>();
         useMap = new HashMap<>();
         succMap = new HashMap<>();
@@ -56,7 +59,7 @@ public class Liveness {
             succMap.get(lineNumber).add(succ);
 
             
-        } else if (!parts[0].equals("ret")) {
+        } else {
             if (!succMap.containsKey(lineNumber)) {
                 succMap.put(lineNumber, new HashSet<>());
             }
@@ -74,9 +77,7 @@ public class Liveness {
     }
 
     private void analyzeLine(String line, Integer lineNumber) {
-        String[] parts = line.trim().split("[ =]+");
-
-        for (String reg : parts) {
+        for (String reg : virtualRegs) {
             if (reg.matches("%\\d+")) {
                Boolean isLive = live(lineNumber, reg);
                if (isLive) {
@@ -103,7 +104,7 @@ public class Liveness {
             return false;
         }
         for (Integer succ : succSet) {
-           if (live(succ, virtualReg) && !def(succ, virtualReg)) {
+           if (live(succ, virtualReg) && !def(lineNumber, virtualReg)) {
             return true;
            }
         }

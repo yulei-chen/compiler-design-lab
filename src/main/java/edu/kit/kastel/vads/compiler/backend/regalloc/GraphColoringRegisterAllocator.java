@@ -36,7 +36,7 @@ public class GraphColoringRegisterAllocator {
         InterferenceGraph graph = new InterferenceGraph();
         for (String reg : regs) graph.addNode(reg);
 
-        Liveness liveness = new Liveness(lines);
+        Liveness liveness = new Liveness(lines, regs);
         HashMap<Integer, HashSet<String>> liveIn = liveness.backwardAnalyze();
 
         for (Integer lineNumber : liveIn.keySet()) {
