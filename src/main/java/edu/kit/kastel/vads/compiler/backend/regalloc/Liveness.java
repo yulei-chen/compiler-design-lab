@@ -56,7 +56,7 @@ public class Liveness {
             succMap.get(lineNumber).add(succ);
 
             
-        } else {
+        } else if (!parts[0].equals("ret")) {
             if (!succMap.containsKey(lineNumber)) {
                 succMap.put(lineNumber, new HashSet<>());
             }
@@ -78,7 +78,13 @@ public class Liveness {
 
         for (String reg : parts) {
             if (reg.matches("%\\d+")) {
-                live(lineNumber, reg);
+               Boolean isLive = live(lineNumber, reg);
+               if (isLive) {
+                if (!liveIn.containsKey(lineNumber)) {
+                    liveIn.put(lineNumber, new HashSet<>());
+                }
+                liveIn.get(lineNumber).add(reg);
+               }
             }
         }
     }
@@ -88,21 +94,16 @@ public class Liveness {
     public boolean live(Integer lineNumber, String virtualReg) {
         // K1
         if (use(lineNumber, virtualReg)) {
-            if (!liveIn.containsKey(lineNumber)) {
-                liveIn.put(lineNumber, new HashSet<>());
-            }
-            liveIn.get(lineNumber).add(virtualReg);
             return true;
         }
         
         // K2
         HashSet<Integer> succSet = succMap.get(lineNumber);
+        if (succSet == null) {
+            return false;
+        }
         for (Integer succ : succSet) {
            if (live(succ, virtualReg) && !def(succ, virtualReg)) {
-            if (!liveIn.containsKey(lineNumber)) {
-                liveIn.put(lineNumber, new HashSet<>());
-            }
-            liveIn.get(lineNumber).add(virtualReg);
             return true;
            }
         }
