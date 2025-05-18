@@ -6,20 +6,7 @@
   "configurations": [
     {
       "type": "java",
-      "name": "Current File",
-      "request": "launch",
-      "mainClass": "${file}"
-    },
-    {
-      "type": "java",
-      "name": "Main",
-      "request": "launch",
-      "mainClass": "edu.kit.kastel.vads.compiler/edu.kit.kastel.vads.compiler.Main",
-      "projectName": "compiler-design-lab"
-    },
-    {
-      "type": "java",
-      "name": "Test with Graph Dump",
+      "name": "Test with shell scripts",
       "request": "launch",
       "mainClass": "edu.kit.kastel.vads.compiler/edu.kit.kastel.vads.compiler.Main",
       "projectName": "compiler-design-lab",
