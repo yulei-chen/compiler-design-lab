@@ -43,8 +43,12 @@ public class AasmToAttAsmTranslator {
         if (line.isEmpty()) return "";
         // 处理函数头和尾
         if (line.startsWith("function ")) {
-            // 统一替换为_main标签
-            return null;
+            if (line.startsWith("function main")) {
+                return null;
+            } else {
+                System.exit(42);
+                throw new AssertionError("No main function");
+            }
         }
         if (line.equals("}")) return "";
         // 处理aasm指令
