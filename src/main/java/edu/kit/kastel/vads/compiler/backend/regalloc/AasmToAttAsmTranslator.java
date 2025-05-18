@@ -59,7 +59,9 @@ public class AasmToAttAsmTranslator {
             String[] srcs = parts[1].trim().split(" ");
             String src1 = regMap.getOrDefault(srcs[0], srcs[0]);
             String src2 = regMap.getOrDefault(srcs[1], srcs[1]);
-            // mov src1, dst; add src2, dst
+            if (dst.equals(src2)) {
+                return String.format("    addq %s, %s", src1, dst);
+            }
             return String.format("    movq %s, %s\n    addq %s, %s", src1, dst, src2, dst);
         }
         if (line.contains(" = sub ")) {
@@ -68,7 +70,6 @@ public class AasmToAttAsmTranslator {
             String[] srcs = parts[1].trim().split(" ");
             String src1 = regMap.getOrDefault(srcs[0], srcs[0]);
             String src2 = regMap.getOrDefault(srcs[1], srcs[1]);
-            // mov src1, dst; sub src2, dst
             return String.format("    movq %s, %s\n    subq %s, %s", src1, dst, src2, dst);
         }
         if (line.contains(" = mul ")) {
