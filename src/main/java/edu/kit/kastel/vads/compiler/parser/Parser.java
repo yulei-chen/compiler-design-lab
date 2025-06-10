@@ -17,6 +17,7 @@ import edu.kit.kastel.vads.compiler.parser.ast.DeclarationTree;
 import edu.kit.kastel.vads.compiler.parser.ast.ExpressionTree;
 import edu.kit.kastel.vads.compiler.parser.ast.FunctionTree;
 import edu.kit.kastel.vads.compiler.parser.ast.IdentExpressionTree;
+import edu.kit.kastel.vads.compiler.parser.ast.IfTree;
 import edu.kit.kastel.vads.compiler.parser.ast.LValueIdentTree;
 import edu.kit.kastel.vads.compiler.parser.ast.LValueTree;
 import edu.kit.kastel.vads.compiler.parser.ast.LiteralTree;
@@ -73,6 +74,11 @@ public class Parser {
 
     private StatementTree parseStatement() {
         StatementTree statement;
+        if (this.tokenSource.peek().isKeyword(KeywordType.IF)) {
+            statement = parseIf();
+            return statement;
+        }
+
         if (this.tokenSource.peek().isKeyword(KeywordType.INT)) {
             statement = parseDeclaration(KeywordType.INT);
         } else if (this.tokenSource.peek().isKeyword(KeywordType.BOOL)) {
@@ -132,6 +138,20 @@ public class Parser {
         Keyword ret = this.tokenSource.expectKeyword(KeywordType.RETURN);
         ExpressionTree expression = parseExpression();
         return new ReturnTree(expression, ret.span().start());
+    }
+
+    private StatementTree parseIf() {
+        Keyword ifKeyword = this.tokenSource.expectKeyword(KeywordType.IF);
+        this.tokenSource.expectSeparator(SeparatorType.PAREN_OPEN);
+        ExpressionTree condition = parseExpression();
+        this.tokenSource.expectSeparator(SeparatorType.PAREN_CLOSE);
+        BlockTree thenBlock = parseBlock();
+        BlockTree elseBlock = null;
+        if (this.tokenSource.peek().isKeyword(KeywordType.ELSE)) {
+            this.tokenSource.expectKeyword(KeywordType.ELSE);
+            elseBlock = parseBlock();
+        }
+        return new IfTree(condition, thenBlock, elseBlock, ifKeyword.span());
     }
 
     private ExpressionTree parseExpression() {

@@ -13,6 +13,7 @@ import edu.kit.kastel.vads.compiler.parser.ast.BlockTree;
 import edu.kit.kastel.vads.compiler.parser.ast.DeclarationTree;
 import edu.kit.kastel.vads.compiler.parser.ast.FunctionTree;
 import edu.kit.kastel.vads.compiler.parser.ast.IdentExpressionTree;
+import edu.kit.kastel.vads.compiler.parser.ast.IfTree;
 import edu.kit.kastel.vads.compiler.parser.ast.LValueIdentTree;
 import edu.kit.kastel.vads.compiler.parser.ast.LiteralTree;
 import edu.kit.kastel.vads.compiler.parser.ast.NameTree;
@@ -213,6 +214,19 @@ public class SsaTranslation {
         @Override
         public Optional<Node> visit(TypeTree typeTree, SsaTranslation data) {
             throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public Optional<Node> visit(IfTree ifTree, SsaTranslation data) {
+            pushSpan(ifTree);
+            Node condition = ifTree.condition().accept(this, data).orElseThrow();
+            ifTree.thenBlock().accept(this, data);
+            if (ifTree.elseBlock() != null) {
+                ifTree.elseBlock().accept(this, data);
+            }
+            Node ifNode = data.constructor.newIf(condition, data.currentBlock(), ifTree.elseBlock() != null ? data.currentBlock() : null);
+            popSpan();
+            return Optional.of(ifNode);
         }
 
         private Node projResultDivMod(SsaTranslation data, Node divMod) {

@@ -7,6 +7,7 @@ import edu.kit.kastel.vads.compiler.ir.node.BinaryOperationNode;
 import edu.kit.kastel.vads.compiler.ir.node.Block;
 import edu.kit.kastel.vads.compiler.ir.node.ConstIntNode;
 import edu.kit.kastel.vads.compiler.ir.node.DivNode;
+import edu.kit.kastel.vads.compiler.ir.node.IfNode;
 import edu.kit.kastel.vads.compiler.ir.node.ModNode;
 import edu.kit.kastel.vads.compiler.ir.node.MulNode;
 import edu.kit.kastel.vads.compiler.ir.node.Node;
@@ -64,6 +65,7 @@ public class CodeGenerator {
                 .append(" = const ")
                 .append(c.value());
             case Phi _ -> throw new UnsupportedOperationException("phi");
+            case IfNode _ -> throw new UnsupportedOperationException("if");
             case Block _, ProjNode _, StartNode _ -> {
                 // do nothing, skip line break
                 return;

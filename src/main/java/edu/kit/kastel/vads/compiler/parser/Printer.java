@@ -4,6 +4,7 @@ import edu.kit.kastel.vads.compiler.parser.ast.AssignmentTree;
 import edu.kit.kastel.vads.compiler.parser.ast.BinaryOperationTree;
 import edu.kit.kastel.vads.compiler.parser.ast.BlockTree;
 import edu.kit.kastel.vads.compiler.parser.ast.IdentExpressionTree;
+import edu.kit.kastel.vads.compiler.parser.ast.IfTree;
 import edu.kit.kastel.vads.compiler.parser.ast.LValueIdentTree;
 import edu.kit.kastel.vads.compiler.parser.ast.LiteralTree;
 import edu.kit.kastel.vads.compiler.parser.ast.NameTree;
@@ -108,8 +109,18 @@ public class Printer {
                 printTree(expr);
                 semicolon();
             }
-            case LValueIdentTree(var name) -> printTree(name);
-            case IdentExpressionTree(var name) -> printTree(name);
+            case LValueIdentTree lValue -> printTree(lValue.name());
+            case IdentExpressionTree ident -> printTree(ident.name());
+            case IfTree ifTree -> {
+                print("if (");
+                printTree(ifTree.condition());
+                print(") ");
+                printTree(ifTree.thenBlock());
+                if (ifTree.elseBlock() != null) {
+                    print(" else ");
+                    printTree(ifTree.elseBlock());
+                }
+            }
         }
     }
 

@@ -1,6 +1,7 @@
 package edu.kit.kastel.vads.compiler.semantic;
 
 import edu.kit.kastel.vads.compiler.parser.ast.FunctionTree;
+import edu.kit.kastel.vads.compiler.parser.ast.IfTree;
 import edu.kit.kastel.vads.compiler.parser.ast.ReturnTree;
 import edu.kit.kastel.vads.compiler.parser.visitor.NoOpVisitor;
 import edu.kit.kastel.vads.compiler.parser.visitor.Unit;
@@ -26,5 +27,14 @@ class ReturnAnalysis implements NoOpVisitor<ReturnAnalysis.ReturnState> {
         }
         data.returns = false;
         return NoOpVisitor.super.visit(functionTree, data);
+    }
+
+    @Override
+    public Unit visit(IfTree ifTree, ReturnState data) {
+        Unit r = ifTree.thenBlock().accept(this, data);
+        if (ifTree.elseBlock() != null) {
+            r = ifTree.elseBlock().accept(this, data);
+        }
+        return r;
     }
 }

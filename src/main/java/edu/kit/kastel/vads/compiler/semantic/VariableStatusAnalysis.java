@@ -4,6 +4,7 @@ import edu.kit.kastel.vads.compiler.lexer.Operator;
 import edu.kit.kastel.vads.compiler.parser.ast.AssignmentTree;
 import edu.kit.kastel.vads.compiler.parser.ast.DeclarationTree;
 import edu.kit.kastel.vads.compiler.parser.ast.IdentExpressionTree;
+import edu.kit.kastel.vads.compiler.parser.ast.IfTree;
 import edu.kit.kastel.vads.compiler.parser.ast.LValueIdentTree;
 import edu.kit.kastel.vads.compiler.parser.ast.NameTree;
 import edu.kit.kastel.vads.compiler.parser.visitor.NoOpVisitor;
@@ -36,6 +37,15 @@ class VariableStatusAnalysis implements NoOpVisitor<Namespace<VariableStatusAnal
             }
         }
         return NoOpVisitor.super.visit(assignmentTree, data);
+    }
+
+    @Override
+    public Unit visit(IfTree ifTree, Namespace<VariableStatus> data) {
+        ifTree.thenBlock().accept(this, data);
+        if (ifTree.elseBlock() != null) {
+            ifTree.elseBlock().accept(this, data);
+        }
+        return Unit.INSTANCE;
     }
 
     private static void checkDeclared(NameTree name, @Nullable VariableStatus status) {

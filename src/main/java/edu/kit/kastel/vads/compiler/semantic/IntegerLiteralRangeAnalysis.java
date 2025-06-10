@@ -1,5 +1,6 @@
 package edu.kit.kastel.vads.compiler.semantic;
 
+import edu.kit.kastel.vads.compiler.parser.ast.IfTree;
 import edu.kit.kastel.vads.compiler.parser.ast.LiteralTree;
 import edu.kit.kastel.vads.compiler.parser.visitor.NoOpVisitor;
 import edu.kit.kastel.vads.compiler.parser.visitor.Unit;
@@ -13,5 +14,10 @@ public class IntegerLiteralRangeAnalysis implements NoOpVisitor<Namespace<Void>>
               () -> new SemanticException("invalid integer literal " + literalTree.raw())
           );
         return NoOpVisitor.super.visit(literalTree, data);
+    }
+
+    @Override
+    public Unit visit(IfTree ifTree, Namespace<Void> data) {
+        return Unit.INSTANCE;
     }
 }

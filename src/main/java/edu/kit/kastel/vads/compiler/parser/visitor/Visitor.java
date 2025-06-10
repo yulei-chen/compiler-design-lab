@@ -6,6 +6,7 @@ import edu.kit.kastel.vads.compiler.parser.ast.BlockTree;
 import edu.kit.kastel.vads.compiler.parser.ast.DeclarationTree;
 import edu.kit.kastel.vads.compiler.parser.ast.FunctionTree;
 import edu.kit.kastel.vads.compiler.parser.ast.IdentExpressionTree;
+import edu.kit.kastel.vads.compiler.parser.ast.IfTree;
 import edu.kit.kastel.vads.compiler.parser.ast.LValueIdentTree;
 import edu.kit.kastel.vads.compiler.parser.ast.LiteralTree;
 import edu.kit.kastel.vads.compiler.parser.ast.NameTree;
@@ -27,6 +28,8 @@ public interface Visitor<T, R> {
     R visit(FunctionTree functionTree, T data);
 
     R visit(IdentExpressionTree identExpressionTree, T data);
+
+    R visit(IfTree ifTree, T data);
 
     R visit(LiteralTree literalTree, T data);
 
