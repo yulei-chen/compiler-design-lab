@@ -31,6 +31,7 @@ import edu.kit.kastel.vads.compiler.parser.type.BasicType;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public class Parser {
     private final TokenSource tokenSource;
@@ -73,7 +74,9 @@ public class Parser {
     private StatementTree parseStatement() {
         StatementTree statement;
         if (this.tokenSource.peek().isKeyword(KeywordType.INT)) {
-            statement = parseDeclaration();
+            statement = parseDeclaration(KeywordType.INT);
+        } else if (this.tokenSource.peek().isKeyword(KeywordType.BOOL)) {
+            statement = parseDeclaration(KeywordType.BOOL);
         } else if (this.tokenSource.peek().isKeyword(KeywordType.RETURN)) {
             statement = parseReturn();
         } else {
@@ -83,15 +86,15 @@ public class Parser {
         return statement;
     }
 
-    private StatementTree parseDeclaration() {
-        Keyword type = this.tokenSource.expectKeyword(KeywordType.INT);
+    private StatementTree parseDeclaration(KeywordType keywordType) {
+        Keyword type = this.tokenSource.expectKeyword(keywordType);
         Identifier ident = this.tokenSource.expectIdentifier();
         ExpressionTree expr = null;
         if (this.tokenSource.peek().isOperator(OperatorType.ASSIGN)) {
             this.tokenSource.expectOperator(OperatorType.ASSIGN);
             expr = parseExpression();
         }
-        return new DeclarationTree(new TypeTree(BasicType.INT, type.span()), name(ident), expr);
+        return new DeclarationTree(new TypeTree(BasicType.fromKeyword(keywordType), type.span()), name(ident), expr);
     }
 
     private StatementTree parseSimple() {
@@ -175,7 +178,11 @@ public class Parser {
             }
             case NumberLiteral(String value, int base, Span span) -> {
                 this.tokenSource.consume();
-                yield new LiteralTree(value, base, span);
+                yield new LiteralTree(value, span, Optional.of(base));
+            }
+            case Keyword(var type, _) when type == KeywordType.TRUE || type == KeywordType.FALSE -> {
+                Span span = this.tokenSource.consume().span();
+                yield new LiteralTree(type.toString(), span, Optional.empty());
             }
             case Token t -> throw new ParseException("invalid factor " + t);
         };
