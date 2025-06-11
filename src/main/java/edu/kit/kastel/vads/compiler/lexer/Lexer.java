@@ -8,6 +8,7 @@ import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 
+// TODO: refactor by DFA
 public class Lexer {
     private final String source;
     private int pos;
@@ -36,12 +37,42 @@ public class Lexer {
             case '{' -> separator(SeparatorType.BRACE_OPEN);
             case '}' -> separator(SeparatorType.BRACE_CLOSE);
             case ';' -> separator(SeparatorType.SEMICOLON);
-            case '-' -> singleOrAssign(OperatorType.MINUS, OperatorType.ASSIGN_MINUS);
-            case '+' -> singleOrAssign(OperatorType.PLUS, OperatorType.ASSIGN_PLUS);
-            case '*' -> singleOrAssign(OperatorType.MUL, OperatorType.ASSIGN_MUL);
-            case '/' -> singleOrAssign(OperatorType.DIV, OperatorType.ASSIGN_DIV);
-            case '%' -> singleOrAssign(OperatorType.MOD, OperatorType.ASSIGN_MOD);
-            case '=' -> new Operator(OperatorType.ASSIGN, buildSpan(1));
+            case '~' -> new Operator(OperatorType.TILDE, buildSpan(1));
+            case '-' -> match('=') ? new Operator(OperatorType.ASSIGN_MINUS, buildSpan(2)) : new Operator(OperatorType.MINUS, buildSpan(1));
+            case '+' -> match('=') ? new Operator(OperatorType.ASSIGN_PLUS, buildSpan(2)) : new Operator(OperatorType.PLUS, buildSpan(1));
+            case '*' -> match('=') ? new Operator(OperatorType.ASSIGN_MUL, buildSpan(2)) : new Operator(OperatorType.MUL, buildSpan(1));
+            case '/' -> match('=') ? new Operator(OperatorType.ASSIGN_DIV, buildSpan(2)) : new Operator(OperatorType.DIV, buildSpan(1));
+            case '%' -> match('=') ? new Operator(OperatorType.ASSIGN_MOD, buildSpan(2)) : new Operator(OperatorType.MOD, buildSpan(1));
+            case '!' -> match('=') ? new Operator(OperatorType.NOT_EQUAL, buildSpan(2)) : new Operator(OperatorType.NOT, buildSpan(1));
+            case '=' -> match('=') ? new Operator(OperatorType.EQUAL, buildSpan(2)) : new Operator(OperatorType.ASSIGN, buildSpan(1));
+            case '<' -> match('=') 
+                        ? new Operator(OperatorType.LESS_EQUAL, buildSpan(2)) 
+                        : (match('<') 
+                            ? match('=', 2) 
+                                ? new Operator(OperatorType.ASSIGN_SHIFT_LEFT, buildSpan(3)) 
+                                : new Operator(OperatorType.SHIFT_LEFT, buildSpan(2)) 
+                            : new Operator(OperatorType.LESS, buildSpan(1)));  
+            case '>' -> match('=') 
+                        ? new Operator(OperatorType.GREATER_EQUAL, buildSpan(2)) 
+                        : (match('>') 
+                            ? match('=', 2) 
+                                ? new Operator(OperatorType.ASSIGN_SHIFT_RIGHT, buildSpan(3)) 
+                                : new Operator(OperatorType.SHIFT_RIGHT, buildSpan(2)) 
+                            : new Operator(OperatorType.GREATER, buildSpan(1)));   
+            case '&' -> match('=') 
+                        ? new Operator(OperatorType.ASSIGN_AND, buildSpan(2)) 
+                        : (match('&')
+                            ? new Operator(OperatorType.AND, buildSpan(2)) 
+                            : new Operator(OperatorType.AND_BITWISE, buildSpan(1)));
+            case '|' -> match('=') 
+                        ? new Operator(OperatorType.ASSIGN_OR, buildSpan(2)) 
+                        : (match('|') 
+                            ? new Operator(OperatorType.OR, buildSpan(2)) 
+                            : new Operator(OperatorType.OR_BITWISE, buildSpan(1)));
+            case '^' -> match('=') 
+                        ? new Operator(OperatorType.ASSIGN_XOR, buildSpan(2)) 
+                        : new Operator(OperatorType.XOR, buildSpan(1));
+            // TODO: Ternary operator '?' ':'
             default -> {
                 if (isIdentifierChar(peek())) {
                     if (isNumeric(peek())) {
@@ -188,11 +219,12 @@ public class Lexer {
         return isNumeric(c) || (c >= 'a' && c <= 'f') || (c >= 'A' && c <= 'F');
     }
 
-    private Token singleOrAssign(OperatorType single, OperatorType assign) {
-        if (hasMore(1) && peek(1) == '=') {
-            return new Operator(assign, buildSpan(2));
-        }
-        return new Operator(single, buildSpan(1));
+    private boolean match(char expected) {
+        return match(expected, 1);
+    }
+
+    private boolean match(char expected, int lookaheadPos) {
+        return hasMore(lookaheadPos) && peek(lookaheadPos) == expected;
     }
 
     private Span buildSpan(int proceed) {
