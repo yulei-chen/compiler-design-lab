@@ -11,6 +11,10 @@ import edu.kit.kastel.vads.compiler.ir.node.ProjNode;
 import edu.kit.kastel.vads.compiler.ir.node.ProjNode.SimpleProjectionInfo;
 import edu.kit.kastel.vads.compiler.ir.node.ReturnNode;
 import edu.kit.kastel.vads.compiler.ir.node.StartNode;
+import edu.kit.kastel.vads.compiler.ir.node.WhileNode;
+import edu.kit.kastel.vads.compiler.ir.node.ForNode;
+import edu.kit.kastel.vads.compiler.ir.node.NotNode;
+import edu.kit.kastel.vads.compiler.ir.node.BitNotNode;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -230,6 +234,11 @@ public class YCompPrinter {
             case ReturnNode _ -> VcgColor.CONTROL_FLOW;
             case StartNode _ -> VcgColor.CONTROL_FLOW;
             case IfNode _ -> VcgColor.NORMAL;
+            case ForNode _ -> VcgColor.NORMAL;
+            case WhileNode _ -> VcgColor.NORMAL;
+            case NotNode _ -> VcgColor.NORMAL;
+            case BitNotNode _ -> VcgColor.NORMAL;
+            default -> VcgColor.NORMAL;
         };
     }
 

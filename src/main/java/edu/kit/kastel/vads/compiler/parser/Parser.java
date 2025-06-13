@@ -140,9 +140,11 @@ public class Parser {
      */
     private TypeTree parseType() {
         if (this.tokenSource.peek().isKeyword(KeywordType.INT)) {
+            this.tokenSource.consume();
             return new TypeTree(BasicType.INT, this.tokenSource.peek().span());
         }
         if (this.tokenSource.peek().isKeyword(KeywordType.BOOL)) {
+            this.tokenSource.consume();
             return new TypeTree(BasicType.BOOL, this.tokenSource.peek().span());
         }
         throw new ParseException("expected type but got " + this.tokenSource.peek());
@@ -265,6 +267,7 @@ public class Parser {
      */
     private StatementTree parseContinue() {
         Keyword continueKeyword = this.tokenSource.expectKeyword(KeywordType.CONTINUE);
+        this.tokenSource.expectSeparator(SeparatorType.SEMICOLON);
         return new ContinueTree(continueKeyword.span());
     }
 
@@ -273,6 +276,7 @@ public class Parser {
      */
     private StatementTree parseBreak() {
         Keyword breakKeyword = this.tokenSource.expectKeyword(KeywordType.BREAK);
+        this.tokenSource.expectSeparator(SeparatorType.SEMICOLON);
         return new BreakTree(breakKeyword.span());
     }
 
@@ -282,6 +286,7 @@ public class Parser {
     private StatementTree parseReturn() {
         Keyword ret = this.tokenSource.expectKeyword(KeywordType.RETURN);
         ExpressionTree expression = parseExpression();
+        this.tokenSource.expectSeparator(SeparatorType.SEMICOLON);  
         return new ReturnTree(expression, ret.span().start());
     }
 

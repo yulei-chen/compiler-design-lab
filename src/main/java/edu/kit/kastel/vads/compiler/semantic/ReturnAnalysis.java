@@ -31,9 +31,9 @@ class ReturnAnalysis implements NoOpVisitor<ReturnAnalysis.ReturnState> {
 
     @Override
     public Unit visit(IfTree ifTree, ReturnState data) {
-        Unit r = ifTree.thenBlock().accept(this, data);
-        if (ifTree.elseBlock() != null) {
-            r = ifTree.elseBlock().accept(this, data);
+        Unit r = ifTree.thenStatement().accept(this, data);
+        if (ifTree.elseStatement() != null) {
+            r = ifTree.elseStatement().accept(this, data);
         }
         return r;
     }

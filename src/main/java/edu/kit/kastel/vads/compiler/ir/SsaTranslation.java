@@ -7,22 +7,8 @@ import edu.kit.kastel.vads.compiler.ir.node.Node;
 import edu.kit.kastel.vads.compiler.ir.optimize.Optimizer;
 import edu.kit.kastel.vads.compiler.ir.util.DebugInfo;
 import edu.kit.kastel.vads.compiler.ir.util.DebugInfoHelper;
-import edu.kit.kastel.vads.compiler.parser.ast.AssignmentTree;
-import edu.kit.kastel.vads.compiler.parser.ast.BinaryOperationTree;
-import edu.kit.kastel.vads.compiler.parser.ast.BlockTree;
-import edu.kit.kastel.vads.compiler.parser.ast.DeclarationTree;
-import edu.kit.kastel.vads.compiler.parser.ast.FunctionTree;
-import edu.kit.kastel.vads.compiler.parser.ast.IdentExpressionTree;
-import edu.kit.kastel.vads.compiler.parser.ast.IfTree;
-import edu.kit.kastel.vads.compiler.parser.ast.LValueIdentTree;
-import edu.kit.kastel.vads.compiler.parser.ast.LiteralTree;
-import edu.kit.kastel.vads.compiler.parser.ast.NameTree;
-import edu.kit.kastel.vads.compiler.parser.ast.NegateTree;
-import edu.kit.kastel.vads.compiler.parser.ast.ProgramTree;
-import edu.kit.kastel.vads.compiler.parser.ast.ReturnTree;
-import edu.kit.kastel.vads.compiler.parser.ast.StatementTree;
-import edu.kit.kastel.vads.compiler.parser.ast.Tree;
-import edu.kit.kastel.vads.compiler.parser.ast.TypeTree;
+import edu.kit.kastel.vads.compiler.lexer.Operator.OperatorType;
+import edu.kit.kastel.vads.compiler.parser.ast.*;
 import edu.kit.kastel.vads.compiler.parser.symbol.Name;
 import edu.kit.kastel.vads.compiler.parser.visitor.Visitor;
 
@@ -220,13 +206,74 @@ public class SsaTranslation {
         public Optional<Node> visit(IfTree ifTree, SsaTranslation data) {
             pushSpan(ifTree);
             Node condition = ifTree.condition().accept(this, data).orElseThrow();
-            ifTree.thenBlock().accept(this, data);
-            if (ifTree.elseBlock() != null) {
-                ifTree.elseBlock().accept(this, data);
+            ifTree.thenStatement().accept(this, data);
+            if (ifTree.elseStatement() != null) {
+                ifTree.elseStatement().accept(this, data);
             }
-            Node ifNode = data.constructor.newIf(condition, data.currentBlock(), ifTree.elseBlock() != null ? data.currentBlock() : null);
+            Node ifNode = data.constructor.newIf(condition, data.currentBlock(), ifTree.elseStatement() != null ? data.currentBlock() : null);
             popSpan();
             return Optional.of(ifNode);
+        }
+
+        @Override
+        public Optional<Node> visit(UnaryOperationTree unaryOperationTree, SsaTranslation data) {
+            pushSpan(unaryOperationTree);
+            Node operand = unaryOperationTree.operand().accept(this, data).orElseThrow();
+            Node res = switch (unaryOperationTree.operatorType()) {
+                case NOT -> data.constructor.newNot(operand);
+                case BIT_NOT -> data.constructor.newBitNot(operand);
+                case UNARY_MINUS -> data.constructor.newSub(data.constructor.newConstInt(0), operand);
+                default -> throw new IllegalArgumentException("not a unary operator " + unaryOperationTree.operatorType());
+            };
+            popSpan();
+            return Optional.of(res);
+        }
+
+        @Override
+        public Optional<Node> visit(ConditionalTree conditionalTree, SsaTranslation data) {
+            pushSpan(conditionalTree);
+            Node condition = conditionalTree.condition().accept(this, data).orElseThrow();
+            Node trueBranch = conditionalTree.trueBranch().accept(this, data).orElseThrow();
+            Node falseBranch = conditionalTree.falseBranch().accept(this, data).orElseThrow();
+            Node res = data.constructor.newPhi(condition, trueBranch, falseBranch);
+            popSpan();
+            return Optional.of(res);
+        }
+
+        @Override
+        public Optional<Node> visit(BreakTree breakTree, SsaTranslation data) {
+            return NOT_AN_EXPRESSION;
+        }
+
+        @Override
+        public Optional<Node> visit(ContinueTree continueTree, SsaTranslation data) {
+            return NOT_AN_EXPRESSION;
+        }
+
+        @Override
+        public Optional<Node> visit(ForTree forTree, SsaTranslation data) {
+            pushSpan(forTree);
+            if (forTree.init() != null) {
+                forTree.init().accept(this, data);
+            }
+            Node condition = forTree.condition().accept(this, data).orElseThrow();
+            forTree.body().accept(this, data);
+            if (forTree.step() != null) {
+                forTree.step().accept(this, data);
+            }
+            Node forNode = data.constructor.newFor(condition, data.currentBlock());
+            popSpan();
+            return Optional.of(forNode);
+        }
+
+        @Override
+        public Optional<Node> visit(WhileTree whileTree, SsaTranslation data) {
+            pushSpan(whileTree);
+            Node condition = whileTree.condition().accept(this, data).orElseThrow();
+            whileTree.body().accept(this, data);
+            Node whileNode = data.constructor.newWhile(condition, data.currentBlock());
+            popSpan();
+            return Optional.of(whileNode);
         }
 
         private Node projResultDivMod(SsaTranslation data, Node divMod) {

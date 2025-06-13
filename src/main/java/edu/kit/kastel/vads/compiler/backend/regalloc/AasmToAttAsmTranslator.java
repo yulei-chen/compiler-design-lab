@@ -114,6 +114,50 @@ public class AasmToAttAsmTranslator {
             String divisor = regMap.getOrDefault(srcs[1], srcs[1]);
             return String.format("    movl %s, %%eax\n    cltd\n    idivl %s\n    movl %%edx, %s", dividend, divisor, dst);
         }
+        if (line.contains(" = not ")) {
+            // dst = !src
+            String[] parts = line.split(" = not ");
+            String dst = regMap.getOrDefault(parts[0].trim(), parts[0].trim());
+            String src = regMap.getOrDefault(parts[1].trim(), parts[1].trim());
+            return String.format("    movl %s, %%eax\n    cmpl $0, %%eax\n    sete %%al\n    movzbl %%al, %%eax\n    movl %%eax, %s", src, dst);
+        }
+        if (line.contains(" = bitnot ")) {
+            // dst = ~src
+            String[] parts = line.split(" = bitnot ");
+            String dst = regMap.getOrDefault(parts[0].trim(), parts[0].trim());
+            String src = regMap.getOrDefault(parts[1].trim(), parts[1].trim());
+            return String.format("    movl %s, %%eax\n    notl %%eax\n    movl %%eax, %s", src, dst);
+        }
+        if (line.startsWith("  if ")) {
+            // if condition then [else]
+            String[] parts = line.trim().split(" if ");
+            String[] conditionParts = parts[1].split(" then");
+            String condition = regMap.getOrDefault(conditionParts[0].trim(), conditionParts[0].trim());
+            String label = "L" + System.identityHashCode(line);
+            if (conditionParts[1].contains("else")) {
+                return String.format("    cmpl $0, %s\n    je %s_else\n%s_then:\n    # then block\n    jmp %s_end\n%s_else:\n    # else block\n%s_end:", 
+                    condition, label, label, label, label, label);
+            } else {
+                return String.format("    cmpl $0, %s\n    je %s_end\n%s_then:\n    # then block\n%s_end:", 
+                    condition, label, label, label);
+            }
+        }
+        if (line.startsWith("  while ")) {
+            // while condition
+            String[] parts = line.trim().split(" while ");
+            String condition = regMap.getOrDefault(parts[1].trim(), parts[1].trim());
+            String label = "L" + System.identityHashCode(line);
+            return String.format("%s_start:\n    cmpl $0, %s\n    je %s_end\n    # while body\n    jmp %s_start\n%s_end:", 
+                label, condition, label, label, label);
+        }
+        if (line.startsWith("  for ")) {
+            // for condition
+            String[] parts = line.trim().split(" for ");
+            String condition = regMap.getOrDefault(parts[1].trim(), parts[1].trim());
+            String label = "L" + System.identityHashCode(line);
+            return String.format("%s_start:\n    cmpl $0, %s\n    je %s_end\n    # for body\n    jmp %s_start\n%s_end:", 
+                label, condition, label, label, label);
+        }
         // 其它情况直接忽略                             
         return null;
     }

@@ -1,6 +1,7 @@
 package edu.kit.kastel.vads.compiler.ir;
 
 import edu.kit.kastel.vads.compiler.ir.node.AddNode;
+import edu.kit.kastel.vads.compiler.ir.node.BitNotNode;
 import edu.kit.kastel.vads.compiler.ir.node.Block;
 import edu.kit.kastel.vads.compiler.ir.node.ConstIntNode;
 import edu.kit.kastel.vads.compiler.ir.node.DivNode;
@@ -8,11 +9,14 @@ import edu.kit.kastel.vads.compiler.ir.node.IfNode;
 import edu.kit.kastel.vads.compiler.ir.node.ModNode;
 import edu.kit.kastel.vads.compiler.ir.node.MulNode;
 import edu.kit.kastel.vads.compiler.ir.node.Node;
+import edu.kit.kastel.vads.compiler.ir.node.NotNode;
 import edu.kit.kastel.vads.compiler.ir.node.Phi;
 import edu.kit.kastel.vads.compiler.ir.node.ProjNode;
 import edu.kit.kastel.vads.compiler.ir.node.ReturnNode;
 import edu.kit.kastel.vads.compiler.ir.node.StartNode;
 import edu.kit.kastel.vads.compiler.ir.node.SubNode;
+import edu.kit.kastel.vads.compiler.ir.node.WhileNode;
+import edu.kit.kastel.vads.compiler.ir.node.ForNode;
 import edu.kit.kastel.vads.compiler.ir.optimize.Optimizer;
 import edu.kit.kastel.vads.compiler.parser.symbol.Name;
 
@@ -192,6 +196,29 @@ class GraphConstructor {
             phi.appendOperand(readSideEffect(pred.block()));
         }
         return tryRemoveTrivialPhi(phi);
+    }
+
+    public Node newNot(Node operand) {
+        return this.optimizer.transform(new NotNode(currentBlock(), operand));
+    }
+
+    public Node newBitNot(Node operand) {
+        return this.optimizer.transform(new BitNotNode(currentBlock(), operand));
+    }
+
+    public Node newPhi(Node condition, Node trueBranch, Node falseBranch) {
+        Phi phi = newPhi();
+        phi.appendOperand(trueBranch);
+        phi.appendOperand(falseBranch);
+        return phi;
+    }
+
+    public Node newFor(Node condition, Block block) {
+        return new ForNode(currentBlock(), condition, block);
+    }
+
+    public Node newWhile(Node condition, Block block) {
+        return new WhileNode(currentBlock(), condition, block);
     }
 
 }

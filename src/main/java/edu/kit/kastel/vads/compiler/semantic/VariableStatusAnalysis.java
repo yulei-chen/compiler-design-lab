@@ -41,9 +41,9 @@ class VariableStatusAnalysis implements NoOpVisitor<Namespace<VariableStatusAnal
 
     @Override
     public Unit visit(IfTree ifTree, Namespace<VariableStatus> data) {
-        ifTree.thenBlock().accept(this, data);
-        if (ifTree.elseBlock() != null) {
-            ifTree.elseBlock().accept(this, data);
+        ifTree.thenStatement().accept(this, data);
+        if (ifTree.elseStatement() != null) {
+            ifTree.elseStatement().accept(this, data);
         }
         return Unit.INSTANCE;
     }

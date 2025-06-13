@@ -16,6 +16,10 @@ import edu.kit.kastel.vads.compiler.ir.node.ProjNode;
 import edu.kit.kastel.vads.compiler.ir.node.ReturnNode;
 import edu.kit.kastel.vads.compiler.ir.node.StartNode;
 import edu.kit.kastel.vads.compiler.ir.node.SubNode;
+import edu.kit.kastel.vads.compiler.ir.node.WhileNode;
+import edu.kit.kastel.vads.compiler.ir.node.ForNode;
+import edu.kit.kastel.vads.compiler.ir.node.NotNode;
+import edu.kit.kastel.vads.compiler.ir.node.BitNotNode;
 
 import java.util.HashSet;
 import java.util.List;
@@ -64,12 +68,43 @@ public class CodeGenerator {
                 .append(registers.get(c))
                 .append(" = const ")
                 .append(c.value());
+            case IfNode ifNode -> {
+                builder.repeat(" ", 2)
+                    .append("if ")
+                    .append(registers.get(ifNode.condition()))
+                    .append(" then ");
+                if (ifNode.elseNode() != null) {
+                    builder.append("else ");
+                }
+            }
+            case WhileNode whileNode -> {
+                builder.repeat(" ", 2)
+                    .append("while ")
+                    .append(registers.get(whileNode.condition()));
+            }
+            case ForNode forNode -> {
+                builder.repeat(" ", 2)
+                    .append("for ")
+                    .append(registers.get(forNode.condition()));
+            }
+            case NotNode not -> {
+                builder.repeat(" ", 2)
+                    .append(registers.get(not))
+                    .append(" = not ")
+                    .append(registers.get(not.operand()));
+            }
+            case BitNotNode bitNot -> {
+                builder.repeat(" ", 2)
+                    .append(registers.get(bitNot))
+                    .append(" = bitnot ")
+                    .append(registers.get(bitNot.operand()));
+            }
             case Phi _ -> throw new UnsupportedOperationException("phi");
-            case IfNode _ -> throw new UnsupportedOperationException("if");
             case Block _, ProjNode _, StartNode _ -> {
                 // do nothing, skip line break
                 return;
             }
+            default -> throw new UnsupportedOperationException("Unsupported node type: " + node.getClass().getSimpleName());
         }
         builder.append("\n");
     }
