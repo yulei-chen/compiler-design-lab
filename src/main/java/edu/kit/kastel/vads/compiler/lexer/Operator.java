@@ -17,7 +17,8 @@ public record Operator(OperatorType type, Span span) implements Token {
     public enum OperatorType {
         /* unary operators */
         NOT("!"),
-        TILDE("~"),
+        BIT_NOT("~"),
+        UNARY_MINUS("-"),
 
         /* assignment operators */
         ASSIGN("="),
@@ -46,11 +47,15 @@ public record Operator(OperatorType type, Span span) implements Token {
         NOT_EQUAL("!="),
         AND("&&"),
         OR("||"),
-        AND_BITWISE("&"),
-        XOR("^"),
-        OR_BITWISE("|"),
+        BIT_AND("&"),
+        BIT_XOR("^"),
+        BIT_OR("|"),
         SHIFT_LEFT("<<"),
         SHIFT_RIGHT(">>"),
+
+        /* ternary operators */
+        QUESTION("?"),
+        COLON(":"),
         ;
 
         private final String value;
