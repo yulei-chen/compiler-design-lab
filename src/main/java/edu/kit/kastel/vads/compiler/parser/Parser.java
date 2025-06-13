@@ -13,8 +13,12 @@ import edu.kit.kastel.vads.compiler.lexer.Token;
 import edu.kit.kastel.vads.compiler.parser.ast.AssignmentTree;
 import edu.kit.kastel.vads.compiler.parser.ast.BinaryOperationTree;
 import edu.kit.kastel.vads.compiler.parser.ast.BlockTree;
+import edu.kit.kastel.vads.compiler.parser.ast.BreakTree;
+import edu.kit.kastel.vads.compiler.parser.ast.ConditionalTree;
+import edu.kit.kastel.vads.compiler.parser.ast.ContinueTree;
 import edu.kit.kastel.vads.compiler.parser.ast.DeclarationTree;
 import edu.kit.kastel.vads.compiler.parser.ast.ExpressionTree;
+import edu.kit.kastel.vads.compiler.parser.ast.ForTree;
 import edu.kit.kastel.vads.compiler.parser.ast.FunctionTree;
 import edu.kit.kastel.vads.compiler.parser.ast.IdentExpressionTree;
 import edu.kit.kastel.vads.compiler.parser.ast.IfTree;
@@ -27,6 +31,8 @@ import edu.kit.kastel.vads.compiler.parser.ast.ProgramTree;
 import edu.kit.kastel.vads.compiler.parser.ast.ReturnTree;
 import edu.kit.kastel.vads.compiler.parser.ast.StatementTree;
 import edu.kit.kastel.vads.compiler.parser.ast.TypeTree;
+import edu.kit.kastel.vads.compiler.parser.ast.UnaryOperationTree;
+import edu.kit.kastel.vads.compiler.parser.ast.WhileTree;
 import edu.kit.kastel.vads.compiler.parser.symbol.Name;
 import edu.kit.kastel.vads.compiler.parser.type.BasicType;
 
@@ -92,6 +98,7 @@ public class Parser {
             case Keyword(var type, _) when type == KeywordType.FOR -> parseFor();
             case Keyword(var type, _) when type == KeywordType.CONTINUE -> parseContinue();
             case Keyword(var type, _) when type == KeywordType.BREAK -> parseBreak();
+            case Keyword(var type, _) when type == KeywordType.RETURN -> parseReturn();
             case Separator(var type, _) when type == SeparatorType.BRACE_OPEN -> parseBlock();
             default -> { 
                 StatementTree simple = parseSimple();
@@ -234,7 +241,7 @@ public class Parser {
     private StatementTree parseFor() {
         Keyword forKeyword = this.tokenSource.expectKeyword(KeywordType.FOR);
         this.tokenSource.expectSeparator(SeparatorType.PAREN_OPEN);
-        ExpressionTree init = null;
+        StatementTree init = null;
         if (this.tokenSource.peek() instanceof Separator(var type, _) && (type == SeparatorType.SEMICOLON)) {
             this.tokenSource.consume();
         } else {
@@ -242,7 +249,7 @@ public class Parser {
         }
         ExpressionTree condition = parseExpression();
         this.tokenSource.expectSeparator(SeparatorType.SEMICOLON);
-        ExpressionTree step = null;
+        StatementTree step = null;
         if (this.tokenSource.peek() instanceof Separator(var type, _) && (type == SeparatorType.SEMICOLON)) {
             this.tokenSource.consume();
         } else {
@@ -438,8 +445,11 @@ public class Parser {
     private ExpressionTree parseUnary() {
         return switch (this.tokenSource.peek()) {
             case Operator(var type, _) when type == OperatorType.NOT || type == OperatorType.BIT_NOT || type == OperatorType.UNARY_MINUS -> {
-                this.tokenSource.consume();
-                yield new UnaryOperationTree(parseUnary(), this.tokenSource.consume().span());
+                Token token = this.tokenSource.consume();
+                if (!(token instanceof Operator operator)) {
+                    throw new ParseException("expected operator but got " + token);
+                }
+                yield new UnaryOperationTree(parseUnary(), operator.type(), operator.span());
             }
             default -> parsePrimary();
         };

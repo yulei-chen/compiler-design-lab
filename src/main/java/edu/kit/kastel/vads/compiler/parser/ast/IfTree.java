@@ -5,14 +5,14 @@ import edu.kit.kastel.vads.compiler.parser.visitor.Visitor;
 
 public final class IfTree implements StatementTree {
     private final ExpressionTree condition;
-    private final BlockTree thenBlock;
-    private final BlockTree elseBlock;
+    private final StatementTree thenStatement;
+    private final StatementTree elseStatement;
     private final Span span;
 
-    public IfTree(ExpressionTree condition, BlockTree thenBlock, BlockTree elseBlock, Span span) {
+    public IfTree(ExpressionTree condition, StatementTree thenStatement, StatementTree elseStatement, Span span) {
         this.condition = condition;
-        this.thenBlock = thenBlock;
-        this.elseBlock = elseBlock;
+        this.thenStatement = thenStatement;
+        this.elseStatement = elseStatement;
         this.span = span;
     }
 
@@ -20,12 +20,12 @@ public final class IfTree implements StatementTree {
         return condition;
     }
 
-    public BlockTree thenBlock() {
-        return thenBlock;
+    public StatementTree thenStatement() {
+        return thenStatement;
     }
 
-    public BlockTree elseBlock() {
-        return elseBlock;
+    public StatementTree elseStatement() {
+        return elseStatement;
     }
 
     @Override

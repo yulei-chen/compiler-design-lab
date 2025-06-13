@@ -3,15 +3,20 @@ package edu.kit.kastel.vads.compiler.parser.ast;
 import edu.kit.kastel.vads.compiler.Span;
 import edu.kit.kastel.vads.compiler.parser.visitor.Visitor;
 
-// TODO: to remove
-public record NegateTree(ExpressionTree expression, Span minusPos) implements ExpressionTree {
+public final class ContinueTree implements StatementTree {
+    private final Span span;
+
+    public ContinueTree(Span span) {
+        this.span = span;
+    }
+
     @Override
     public Span span() {
-        return minusPos().merge(expression().span());
+        return span;
     }
 
     @Override
     public <T, R> R accept(Visitor<T, R> visitor, T data) {
         return visitor.visit(this, data);
     }
-}
+} 

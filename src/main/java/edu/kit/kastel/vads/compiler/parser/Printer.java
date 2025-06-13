@@ -16,6 +16,12 @@ import edu.kit.kastel.vads.compiler.parser.ast.FunctionTree;
 import edu.kit.kastel.vads.compiler.parser.ast.ProgramTree;
 import edu.kit.kastel.vads.compiler.parser.ast.StatementTree;
 import edu.kit.kastel.vads.compiler.parser.ast.TypeTree;
+import edu.kit.kastel.vads.compiler.parser.ast.WhileTree;
+import edu.kit.kastel.vads.compiler.parser.ast.UnaryOperationTree;
+import edu.kit.kastel.vads.compiler.parser.ast.ConditionalTree;
+import edu.kit.kastel.vads.compiler.parser.ast.ContinueTree;
+import edu.kit.kastel.vads.compiler.parser.ast.BreakTree;
+import edu.kit.kastel.vads.compiler.parser.ast.ForTree;
 
 import java.util.List;
 
@@ -115,12 +121,52 @@ public class Printer {
                 print("if (");
                 printTree(ifTree.condition());
                 print(") ");
-                printTree(ifTree.thenBlock());
-                if (ifTree.elseBlock() != null) {
+                printTree(ifTree.thenStatement());
+                if (ifTree.elseStatement() != null) {
                     print(" else ");
-                    printTree(ifTree.elseBlock());
+                    printTree(ifTree.elseStatement());
                 }
             }
+            case WhileTree whileTree -> {
+                print("while (");
+                printTree(whileTree.condition());
+                print(") ");
+                printTree(whileTree.body());
+            }
+            case ForTree forTree -> {
+                print("for (");
+                printTree(forTree.init());
+                print("; ");
+                printTree(forTree.condition());
+                print("; ");
+                printTree(forTree.step());
+                print(") ");
+                printTree(forTree.body());
+            }
+            case ContinueTree continueTree -> {
+                print("continue;");
+            }
+            case BreakTree breakTree -> {
+                print("break;");
+            }
+            case ConditionalTree conditionalTree -> {
+                print("(");
+                printTree(conditionalTree.condition());
+                print(") ");
+                printTree(conditionalTree.trueBranch());
+                if (conditionalTree.falseBranch() != null) {
+                    print(" : ");
+                    printTree(conditionalTree.falseBranch());
+                }
+            }
+            case UnaryOperationTree unaryOperationTree -> {
+                print("(");
+                this.builder.append(unaryOperationTree.operatorType());
+                print("(");
+                printTree(unaryOperationTree.operand());
+                print(")");
+            }
+            default -> throw new IllegalStateException("Unexpected value: " + tree);
         }
     }
 

@@ -37,7 +37,7 @@ public class Lexer {
             case '{' -> separator(SeparatorType.BRACE_OPEN);
             case '}' -> separator(SeparatorType.BRACE_CLOSE);
             case ';' -> separator(SeparatorType.SEMICOLON);
-            case '~' -> new Operator(OperatorType.TILDE, buildSpan(1));
+            case '~' -> new Operator(OperatorType.BIT_NOT, buildSpan(1));
             case '-' -> match('=') ? new Operator(OperatorType.ASSIGN_MINUS, buildSpan(2)) : new Operator(OperatorType.MINUS, buildSpan(1));
             case '+' -> match('=') ? new Operator(OperatorType.ASSIGN_PLUS, buildSpan(2)) : new Operator(OperatorType.PLUS, buildSpan(1));
             case '*' -> match('=') ? new Operator(OperatorType.ASSIGN_MUL, buildSpan(2)) : new Operator(OperatorType.MUL, buildSpan(1));
@@ -63,16 +63,17 @@ public class Lexer {
                         ? new Operator(OperatorType.ASSIGN_AND, buildSpan(2)) 
                         : (match('&')
                             ? new Operator(OperatorType.AND, buildSpan(2)) 
-                            : new Operator(OperatorType.AND_BITWISE, buildSpan(1)));
+                            : new Operator(OperatorType.BIT_AND, buildSpan(1)));
             case '|' -> match('=') 
                         ? new Operator(OperatorType.ASSIGN_OR, buildSpan(2)) 
                         : (match('|') 
                             ? new Operator(OperatorType.OR, buildSpan(2)) 
-                            : new Operator(OperatorType.OR_BITWISE, buildSpan(1)));
+                            : new Operator(OperatorType.BIT_OR, buildSpan(1)));
             case '^' -> match('=') 
                         ? new Operator(OperatorType.ASSIGN_XOR, buildSpan(2)) 
-                        : new Operator(OperatorType.XOR, buildSpan(1));
-            // TODO: Ternary operator '?' ':'
+                        : new Operator(OperatorType.BIT_XOR, buildSpan(1));
+            case '?' -> new Operator(OperatorType.QUESTION, buildSpan(1));
+            case ':' -> new Operator(OperatorType.COLON, buildSpan(1));
             default -> {
                 if (isIdentifierChar(peek())) {
                     if (isNumeric(peek())) {
