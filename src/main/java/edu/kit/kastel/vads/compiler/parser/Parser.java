@@ -157,7 +157,8 @@ public class Parser {
     private Operator parseAssignmentOperator() {
         if (this.tokenSource.peek() instanceof Operator op) {
             return switch (op.type()) {
-                case ASSIGN, ASSIGN_DIV, ASSIGN_MINUS, ASSIGN_MOD, ASSIGN_MUL, ASSIGN_PLUS, ASSIGN_SHIFT_LEFT, ASSIGN_SHIFT_RIGHT -> {
+                case ASSIGN, ASSIGN_DIV, ASSIGN_MINUS, ASSIGN_MOD, ASSIGN_MUL, ASSIGN_PLUS, 
+                     ASSIGN_SHIFT_LEFT, ASSIGN_SHIFT_RIGHT, ASSIGN_AND, ASSIGN_XOR, ASSIGN_OR -> {
                     this.tokenSource.consume();
                     yield op;
                 }

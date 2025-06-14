@@ -20,6 +20,8 @@ import edu.kit.kastel.vads.compiler.ir.node.WhileNode;
 import edu.kit.kastel.vads.compiler.ir.node.ForNode;
 import edu.kit.kastel.vads.compiler.ir.node.NotNode;
 import edu.kit.kastel.vads.compiler.ir.node.BitNotNode;
+import edu.kit.kastel.vads.compiler.ir.node.ShiftLeftNode;
+import edu.kit.kastel.vads.compiler.ir.node.ShiftRightNode;
 
 import java.util.HashSet;
 import java.util.List;
@@ -62,6 +64,8 @@ public class CodeGenerator {
             case MulNode mul -> binary(builder, registers, mul, "mul");
             case DivNode div -> binary(builder, registers, div, "div");
             case ModNode mod -> binary(builder, registers, mod, "mod");
+            case ShiftLeftNode shiftLeft -> binary(builder, registers, shiftLeft, "shl");
+            case ShiftRightNode shiftRight -> binary(builder, registers, shiftRight, "shr");
             case ReturnNode r -> builder.repeat(" ", 2).append("ret ")
                 .append(registers.get(predecessorSkipProj(r, ReturnNode.RESULT)));
             case ConstIntNode c -> builder.repeat(" ", 2)
