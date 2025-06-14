@@ -4,6 +4,7 @@ import edu.kit.kastel.vads.compiler.ir.node.Block;
 import edu.kit.kastel.vads.compiler.ir.node.DivNode;
 import edu.kit.kastel.vads.compiler.ir.node.ModNode;
 import edu.kit.kastel.vads.compiler.ir.node.Node;
+import edu.kit.kastel.vads.compiler.ir.node.Phi;
 import edu.kit.kastel.vads.compiler.ir.optimize.Optimizer;
 import edu.kit.kastel.vads.compiler.ir.util.DebugInfo;
 import edu.kit.kastel.vads.compiler.ir.util.DebugInfoHelper;
@@ -223,12 +224,62 @@ public class SsaTranslation {
         @Override
         public Optional<Node> visit(IfTree ifTree, SsaTranslation data) {
             pushSpan(ifTree);
+            
+            // 1. 处理条件表达式
             Node condition = ifTree.condition().accept(this, data).orElseThrow();
+            
+            // 2. 保存当前块，用于后续创建合并块
+            Block currentBlock = data.currentBlock();
+            
+            // 3. 创建 then 分支块
+            Block thenBlock = data.constructor.newBlock();
+            data.constructor.sealBlock(thenBlock);
+            
+            // 4. 处理 then 分支
+            data.constructor.setCurrentBlock(thenBlock);
             ifTree.thenStatement().accept(this, data);
+            Node thenSideEffect = data.constructor.readCurrentSideEffect();
+            
+            // 5. 创建 else 分支块（如果存在）
+            Block elseBlock = null;
+            Node elseSideEffect = null;
             if (ifTree.elseStatement() != null) {
+                elseBlock = data.constructor.newBlock();
+                data.constructor.sealBlock(elseBlock);
+                data.constructor.setCurrentBlock(elseBlock);
                 ifTree.elseStatement().accept(this, data);
+                elseSideEffect = data.constructor.readCurrentSideEffect();
             }
-            Node ifNode = data.constructor.newIf(condition, data.currentBlock(), ifTree.elseStatement() != null ? data.currentBlock() : null);
+            
+            // 6. 创建合并块
+            Block mergeBlock = data.constructor.newBlock();
+            data.constructor.sealBlock(mergeBlock);
+            
+            // 7. 创建 if 节点并设置控制流
+            Node ifNode = data.constructor.newIf(condition, thenBlock, elseBlock);
+            currentBlock.addPredecessor(ifNode);
+            
+            // 8. 设置分支到合并块
+            thenBlock.addPredecessor(mergeBlock);
+            if (elseBlock != null) {
+                elseBlock.addPredecessor(mergeBlock);
+            }
+            
+            // 9. 处理副作用
+            if (elseBlock != null) {
+                // 如果有 else 分支，需要创建 phi 节点来合并副作用
+                Phi sideEffectPhi = data.constructor.newPhi();
+                sideEffectPhi.appendOperand(thenSideEffect);
+                sideEffectPhi.appendOperand(elseSideEffect);
+                data.constructor.writeCurrentSideEffect(sideEffectPhi);
+            } else {
+                // 如果没有 else 分支，直接使用 then 分支的副作用
+                data.constructor.writeCurrentSideEffect(thenSideEffect);
+            }
+            
+            // 10. 设置当前块为合并块
+            data.constructor.setCurrentBlock(mergeBlock);
+            
             popSpan();
             return Optional.of(ifNode);
         }
@@ -271,15 +322,67 @@ public class SsaTranslation {
         @Override
         public Optional<Node> visit(ForTree forTree, SsaTranslation data) {
             pushSpan(forTree);
+            
+            // 1. 保存当前块作为循环入口块
+            Block entryBlock = data.currentBlock();
+            
+            // 2. 处理初始化语句（如果存在）
             if (forTree.init() != null) {
                 forTree.init().accept(this, data);
             }
+            
+            // 3. 创建循环头块
+            Block headerBlock = data.constructor.newBlock();
+            data.constructor.sealBlock(headerBlock);
+            data.constructor.setCurrentBlock(headerBlock);
+            
+            // 4. 处理循环条件
             Node condition = forTree.condition().accept(this, data).orElseThrow();
+            
+            // 5. 创建循环体块
+            Block bodyBlock = data.constructor.newBlock();
+            data.constructor.sealBlock(bodyBlock);
+            data.constructor.setCurrentBlock(bodyBlock);
+            
+            // 6. 处理循环体
             forTree.body().accept(this, data);
+            Node bodySideEffect = data.constructor.readCurrentSideEffect();
+            
+            // 7. 创建步进块（用于处理步进表达式）
+            Block stepBlock = data.constructor.newBlock();
+            data.constructor.sealBlock(stepBlock);
+            data.constructor.setCurrentBlock(stepBlock);
+            
+            // 8. 处理步进表达式（如果存在）
             if (forTree.step() != null) {
                 forTree.step().accept(this, data);
             }
-            Node forNode = data.constructor.newFor(condition, data.currentBlock());
+            Node stepSideEffect = data.constructor.readCurrentSideEffect();
+            
+            // 9. 创建循环出口块
+            Block exitBlock = data.constructor.newBlock();
+            data.constructor.sealBlock(exitBlock);
+            
+            // 10. 创建 for 节点并设置控制流
+            Node forNode = data.constructor.newFor(condition, bodyBlock);
+            
+            // 11. 设置控制流关系
+            entryBlock.addPredecessor(headerBlock);    // 入口块 -> 头块
+            headerBlock.addPredecessor(bodyBlock);     // 头块 -> 循环体
+            bodyBlock.addPredecessor(stepBlock);       // 循环体 -> 步进块
+            stepBlock.addPredecessor(headerBlock);     // 步进块 -> 头块（循环）
+            headerBlock.addPredecessor(exitBlock);     // 头块 -> 出口块（条件为假时）
+            
+            // 12. 处理副作用
+            // 在循环头块中创建 phi 节点来合并入口和步进块的副作用
+            Phi sideEffectPhi = data.constructor.newPhi();
+            sideEffectPhi.appendOperand(data.constructor.readCurrentSideEffect());  // 入口副作用
+            sideEffectPhi.appendOperand(stepSideEffect);  // 步进块副作用
+            data.constructor.writeCurrentSideEffect(sideEffectPhi);
+            
+            // 13. 设置当前块为出口块
+            data.constructor.setCurrentBlock(exitBlock);
+            
             popSpan();
             return Optional.of(forNode);
         }
@@ -287,9 +390,50 @@ public class SsaTranslation {
         @Override
         public Optional<Node> visit(WhileTree whileTree, SsaTranslation data) {
             pushSpan(whileTree);
+            
+            // 1. 保存当前块作为循环入口块
+            Block entryBlock = data.currentBlock();
+            
+            // 2. 创建循环头块（用于条件判断）
+            Block headerBlock = data.constructor.newBlock();
+            data.constructor.sealBlock(headerBlock);
+            data.constructor.setCurrentBlock(headerBlock);
+            
+            // 3. 处理循环条件
             Node condition = whileTree.condition().accept(this, data).orElseThrow();
+            
+            // 4. 创建循环体块
+            Block bodyBlock = data.constructor.newBlock();
+            data.constructor.sealBlock(bodyBlock);
+            data.constructor.setCurrentBlock(bodyBlock);
+            
+            // 5. 处理循环体
             whileTree.body().accept(this, data);
-            Node whileNode = data.constructor.newWhile(condition, data.currentBlock());
+            Node bodySideEffect = data.constructor.readCurrentSideEffect();
+            
+            // 6. 创建循环出口块
+            Block exitBlock = data.constructor.newBlock();
+            data.constructor.sealBlock(exitBlock);
+            
+            // 7. 创建 while 节点并设置控制流
+            Node whileNode = data.constructor.newWhile(condition, bodyBlock);
+            
+            // 8. 设置控制流关系
+            entryBlock.addPredecessor(headerBlock);  // 入口块 -> 头块
+            headerBlock.addPredecessor(bodyBlock);   // 头块 -> 循环体
+            bodyBlock.addPredecessor(headerBlock);   // 循环体 -> 头块（循环）
+            headerBlock.addPredecessor(exitBlock);   // 头块 -> 出口块（条件为假时）
+            
+            // 9. 处理副作用
+            // 在循环头块中创建 phi 节点来合并入口和循环体的副作用
+            Phi sideEffectPhi = data.constructor.newPhi();
+            sideEffectPhi.appendOperand(data.constructor.readCurrentSideEffect());  // 入口副作用
+            sideEffectPhi.appendOperand(bodySideEffect);  // 循环体副作用
+            data.constructor.writeCurrentSideEffect(sideEffectPhi);
+            
+            // 10. 设置当前块为出口块
+            data.constructor.setCurrentBlock(exitBlock);
+            
             popSpan();
             return Optional.of(whileNode);
         }

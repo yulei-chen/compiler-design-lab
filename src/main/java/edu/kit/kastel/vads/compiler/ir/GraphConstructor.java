@@ -286,4 +286,12 @@ class GraphConstructor {
         return new WhileNode(currentBlock(), condition, block);
     }
 
+    public Block newBlock() {
+        return new Block(this.graph);
+    }
+
+    public void setCurrentBlock(Block block) {
+        this.currentBlock = block;
+    }
+
 }

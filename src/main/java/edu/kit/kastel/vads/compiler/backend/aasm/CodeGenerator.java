@@ -99,7 +99,17 @@ public class CodeGenerator {
                     .append(" = bitnot ")
                     .append(registers.get(bitNot.operand()));
             }
-            case Phi _ -> throw new UnsupportedOperationException("phi");
+            case Phi phi -> {
+                builder.repeat(" ", 2)
+                    .append(registers.get(phi))
+                    .append(" = phi ");
+                for (int i = 0; i < phi.predecessors().size(); i++) {
+                    if (i > 0) {
+                        builder.append(", ");
+                    }
+                    builder.append(registers.get(phi.predecessor(i)));
+                }
+            }
             case Block _, ProjNode _, StartNode _ -> {
                 // do nothing, skip line break
                 return;
