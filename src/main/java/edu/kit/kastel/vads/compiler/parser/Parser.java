@@ -421,7 +421,7 @@ public class Parser {
      */
     private ExpressionTree parseTerm() {
         ExpressionTree lhs = parseFactor();
-        while (this.tokenSource.peek() instanceof Operator(var type, _) && (type == OperatorType.MUL || type == OperatorType.MINUS)) {
+        while (this.tokenSource.peek() instanceof Operator(var type, _) && (type == OperatorType.PLUS || type == OperatorType.MINUS)) {
             this.tokenSource.consume();
             ExpressionTree rhs = parseFactor();
             lhs = new BinaryOperationTree(lhs, rhs, type);
@@ -449,7 +449,7 @@ public class Parser {
      */
     private ExpressionTree parseUnary() {
         return switch (this.tokenSource.peek()) {
-            case Operator(var type, _) when type == OperatorType.NOT || type == OperatorType.BIT_NOT || type == OperatorType.UNARY_MINUS -> {
+            case Operator(var type, _) when type == OperatorType.NOT || type == OperatorType.BIT_NOT || type == OperatorType.MINUS -> {
                 Token token = this.tokenSource.consume();
                 if (!(token instanceof Operator operator)) {
                     throw new ParseException("expected operator but got " + token);

@@ -222,7 +222,7 @@ public class SsaTranslation {
             Node res = switch (unaryOperationTree.operatorType()) {
                 case NOT -> data.constructor.newNot(operand);
                 case BIT_NOT -> data.constructor.newBitNot(operand);
-                case UNARY_MINUS -> data.constructor.newSub(data.constructor.newConstInt(0), operand);
+                case MINUS -> data.constructor.newSub(data.constructor.newConstInt(0), operand);
                 default -> throw new IllegalArgumentException("not a unary operator " + unaryOperationTree.operatorType());
             };
             popSpan();

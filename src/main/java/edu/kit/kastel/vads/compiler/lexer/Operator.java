@@ -18,7 +18,7 @@ public record Operator(OperatorType type, Span span) implements Token {
         /* unary operators */
         NOT("!"),
         BIT_NOT("~"),
-        UNARY_MINUS("-"),
+        // MINUS(""),
 
         /* assignment operators */
         ASSIGN("="),
