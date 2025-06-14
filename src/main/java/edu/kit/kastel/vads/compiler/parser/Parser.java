@@ -248,6 +248,7 @@ public class Parser {
             this.tokenSource.consume();
         } else {
             init = parseSimple();
+            this.tokenSource.expectSeparator(SeparatorType.SEMICOLON);
         }
         ExpressionTree condition = parseExpression();
         this.tokenSource.expectSeparator(SeparatorType.SEMICOLON);

@@ -17,6 +17,19 @@ import edu.kit.kastel.vads.compiler.ir.node.StartNode;
 import edu.kit.kastel.vads.compiler.ir.node.SubNode;
 import edu.kit.kastel.vads.compiler.ir.node.WhileNode;
 import edu.kit.kastel.vads.compiler.ir.node.ForNode;
+import edu.kit.kastel.vads.compiler.ir.node.BitAndNode;
+import edu.kit.kastel.vads.compiler.ir.node.BitOrNode;
+import edu.kit.kastel.vads.compiler.ir.node.BitXorNode;
+import edu.kit.kastel.vads.compiler.ir.node.ShiftLeftNode;
+import edu.kit.kastel.vads.compiler.ir.node.ShiftRightNode;
+import edu.kit.kastel.vads.compiler.ir.node.AndNode;
+import edu.kit.kastel.vads.compiler.ir.node.OrNode;
+import edu.kit.kastel.vads.compiler.ir.node.LessNode;
+import edu.kit.kastel.vads.compiler.ir.node.LessEqualNode;
+import edu.kit.kastel.vads.compiler.ir.node.GreaterNode;
+import edu.kit.kastel.vads.compiler.ir.node.GreaterEqualNode;
+import edu.kit.kastel.vads.compiler.ir.node.EqualNode;
+import edu.kit.kastel.vads.compiler.ir.node.NotEqualNode;
 import edu.kit.kastel.vads.compiler.ir.optimize.Optimizer;
 import edu.kit.kastel.vads.compiler.parser.symbol.Name;
 
@@ -204,6 +217,58 @@ class GraphConstructor {
 
     public Node newBitNot(Node operand) {
         return this.optimizer.transform(new BitNotNode(currentBlock(), operand));
+    }
+
+    public Node newBitAnd(Node left, Node right) {
+        return this.optimizer.transform(new BitAndNode(currentBlock(), left, right));
+    }
+
+    public Node newBitOr(Node left, Node right) {
+        return this.optimizer.transform(new BitOrNode(currentBlock(), left, right));
+    }
+
+    public Node newBitXor(Node left, Node right) {
+        return this.optimizer.transform(new BitXorNode(currentBlock(), left, right));
+    }
+
+    public Node newShiftLeft(Node left, Node right) {
+        return this.optimizer.transform(new ShiftLeftNode(currentBlock(), left, right));
+    }
+
+    public Node newShiftRight(Node left, Node right) {
+        return this.optimizer.transform(new ShiftRightNode(currentBlock(), left, right));
+    }
+
+    public Node newAnd(Node left, Node right) {
+        return this.optimizer.transform(new AndNode(currentBlock(), left, right));
+    }
+
+    public Node newOr(Node left, Node right) {
+        return this.optimizer.transform(new OrNode(currentBlock(), left, right));
+    }
+
+    public Node newLess(Node left, Node right) {
+        return this.optimizer.transform(new LessNode(currentBlock(), left, right));
+    }
+
+    public Node newLessEqual(Node left, Node right) {
+        return this.optimizer.transform(new LessEqualNode(currentBlock(), left, right));
+    }
+
+    public Node newGreater(Node left, Node right) {
+        return this.optimizer.transform(new GreaterNode(currentBlock(), left, right));
+    }
+
+    public Node newGreaterEqual(Node left, Node right) {
+        return this.optimizer.transform(new GreaterEqualNode(currentBlock(), left, right));
+    }
+
+    public Node newEqual(Node left, Node right) {
+        return this.optimizer.transform(new EqualNode(currentBlock(), left, right));
+    }
+
+    public Node newNotEqual(Node left, Node right) {
+        return this.optimizer.transform(new NotEqualNode(currentBlock(), left, right));
     }
 
     public Node newPhi(Node condition, Node trueBranch, Node falseBranch) {

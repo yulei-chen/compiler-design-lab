@@ -59,8 +59,8 @@ public sealed abstract class Node permits BinaryOperationNode, Block, ConstIntNo
     }
 
     @Override
-    public final String toString() {
-        return (this.getClass().getSimpleName().replace("Node", "") + " " + info()).stripTrailing();
+    public String toString() {
+        return getClass().getSimpleName();
     }
 
     protected String info() {

@@ -76,6 +76,11 @@ public class SsaTranslation {
                 case ASSIGN_MUL -> data.constructor::newMul;
                 case ASSIGN_DIV -> (lhs, rhs) -> projResultDivMod(data, data.constructor.newDiv(lhs, rhs));
                 case ASSIGN_MOD -> (lhs, rhs) -> projResultDivMod(data, data.constructor.newMod(lhs, rhs));
+                case ASSIGN_AND -> data.constructor::newBitAnd;
+                case ASSIGN_OR -> data.constructor::newBitOr;
+                case ASSIGN_XOR -> data.constructor::newBitXor;
+                case ASSIGN_SHIFT_LEFT -> data.constructor::newShiftLeft;
+                case ASSIGN_SHIFT_RIGHT -> data.constructor::newShiftRight;
                 case ASSIGN -> null;
                 default ->
                     throw new IllegalArgumentException("not an assignment operator " + assignmentTree.operator());
@@ -105,6 +110,19 @@ public class SsaTranslation {
                 case MUL -> data.constructor.newMul(lhs, rhs);
                 case DIV -> projResultDivMod(data, data.constructor.newDiv(lhs, rhs));
                 case MOD -> projResultDivMod(data, data.constructor.newMod(lhs, rhs));
+                case BIT_AND -> data.constructor.newBitAnd(lhs, rhs);
+                case BIT_OR -> data.constructor.newBitOr(lhs, rhs);
+                case BIT_XOR -> data.constructor.newBitXor(lhs, rhs);
+                case SHIFT_LEFT -> data.constructor.newShiftLeft(lhs, rhs);
+                case SHIFT_RIGHT -> data.constructor.newShiftRight(lhs, rhs);
+                case AND -> data.constructor.newAnd(lhs, rhs);
+                case OR -> data.constructor.newOr(lhs, rhs);
+                case LESS -> data.constructor.newLess(lhs, rhs);
+                case LESS_EQUAL -> data.constructor.newLessEqual(lhs, rhs);
+                case GREATER -> data.constructor.newGreater(lhs, rhs);
+                case GREATER_EQUAL -> data.constructor.newGreaterEqual(lhs, rhs);
+                case EQUAL -> data.constructor.newEqual(lhs, rhs);
+                case NOT_EQUAL -> data.constructor.newNotEqual(lhs, rhs);
                 default ->
                     throw new IllegalArgumentException("not a binary expression operator " + binaryOperationTree.operatorType());
             };
