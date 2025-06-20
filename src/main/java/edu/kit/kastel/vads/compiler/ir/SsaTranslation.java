@@ -72,7 +72,7 @@ public class SsaTranslation {
         public Optional<Node> visit(AssignmentTree assignmentTree, SsaTranslation data) {
             pushSpan(assignmentTree);
             BinaryOperator<Node> desugar = switch (assignmentTree.operator().type()) {
-                case ASSIGN_MINUS -> data.constructor::newSub;
+                case ASSIGN_Negate -> data.constructor::newSub;
                 case ASSIGN_PLUS -> data.constructor::newAdd;
                 case ASSIGN_MUL -> data.constructor::newMul;
                 case ASSIGN_DIV -> (lhs, rhs) -> projResultDivMod(data, data.constructor.newDiv(lhs, rhs));
@@ -106,7 +106,7 @@ public class SsaTranslation {
             Node lhs = binaryOperationTree.lhs().accept(this, data).orElseThrow();
             Node rhs = binaryOperationTree.rhs().accept(this, data).orElseThrow();
             Node res = switch (binaryOperationTree.operatorType()) {
-                case MINUS -> data.constructor.newSub(lhs, rhs);
+                case NEGATE -> data.constructor.newSub(lhs, rhs);
                 case PLUS -> data.constructor.newAdd(lhs, rhs);
                 case MUL -> data.constructor.newMul(lhs, rhs);
                 case DIV -> projResultDivMod(data, data.constructor.newDiv(lhs, rhs));
@@ -290,8 +290,8 @@ public class SsaTranslation {
             Node operand = unaryOperationTree.operand().accept(this, data).orElseThrow();
             Node res = switch (unaryOperationTree.operatorType()) {
                 case NOT -> data.constructor.newNot(operand);
-                case BIT_NOT -> data.constructor.newBitNot(operand);
-                case MINUS -> data.constructor.newSub(data.constructor.newConstInt(0), operand);
+                case COMPLEMENT -> data.constructor.newBitNot(operand);
+                case NEGATE -> data.constructor.newSub(data.constructor.newConstInt(0), operand);
                 default -> throw new IllegalArgumentException("not a unary operator " + unaryOperationTree.operatorType());
             };
             popSpan();

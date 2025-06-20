@@ -1,4 +1,82 @@
-# Starter Code: Java
+# Compiler Design
+
+## Lexer
+
+## Parser
+
+### Grammar
+
+```
+<program> ::= <function>
+<function> ::= int main () <block>
+<block> ::= { <statement> }
+<statement> ::= return <exp> ;
+<exp> ::= <factor> | <exp> <binop> <exp>
+<factor> ::= <int> | <unop> <factor> | ( <exp> )
+<unop> ::= - | ~
+<binop> ::= - | + | _ | / | %
+<identifier> ::= [A-Za-z\_][A-Za-z0-9_]_
+<int> ::= 0 | [1-9][0-9]\*
+```
+
+### AST
+
+```
+program = Program(function_definition)
+function_definition = Function(identifier name, statement body)
+statement = Return(exp)
+exp = Constant(int) | Unary(unary_operator, exp)
+unary_operator = COMPLEMENT | NEGATE
+```
+
+## IR
+
+## TAC
+
+```
+program = Program(function_definition)
+function_definition = Function(identifier, instruction* body)
+instruction = Return(val) | Unary(unary_operator, val src, val dst)
+val = Constant(int) | Var(identifier)
+unary_operator = COMPLEMENT | NEGATE
+```
+
+## Assembly
+
+### Assembly AST
+
+```
+program = Program(function_definition)
+function_definition = Function(identifier name, instruction* instructions)
+instruction = Mov(operand src, operand dst)
+| Unary(unary_operator, operand)
+| AllocateStack(int)
+| Ret
+unary_operator = Neg | Not
+operand = Imm(int) | Reg(reg) | Pseudo(identifier) | Stack(int)
+reg = AX | R10
+```
+
+### IR to Assembly AST
+
+| IR                              | Assembly                                       |
+| ------------------------------- | ---------------------------------------------- |
+| Program(function_definition)    | Program(function_definition)                   |
+| Function(name, instructions)    | Function(name, instructions)                   |
+| Return(val)                     | Mov(val, Reg(AX)) <br/> Ret                    |
+| Unary(unary_operator, src, dst) | Mov(src, dst) <br/> Unary(unary_operator, dst) |
+| COMPLEMENT                      | Not                                            |
+| NEGATE                          | Neg                                            |
+| Constant(int)                   | Imm(int)                                       |
+| Var(identifier)                 | Pseudo(identifier)                             |
+
+### Code Emission
+
+<Details>
+
+<summary>
+Starter Code: Java
+</summary>
 
 This project contains starter code written in Java 24.
 It contains:
@@ -81,6 +159,7 @@ You can get rid of all that, but it can be helpful to track down where something
 
 To use yComp, you need to patch the provided start script to make it work with modern Java versions.
 You can copy-paste the following script:
+
 ```sh
 #!/bin/sh
 set -e
@@ -127,3 +206,5 @@ This project provides the wrapper for Gradle 8.14.
 Additionally, the `application` plugin is used to easily specify the main class and build ready-to-use executables.
 To ease setup ceremony,
 the `foojay-resolver-convention` is used to automatically download a JDK matching the toolchain configuration.
+
+</details>

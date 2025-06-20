@@ -157,7 +157,7 @@ public class Parser {
     private Operator parseAssignmentOperator() {
         if (this.tokenSource.peek() instanceof Operator op) {
             return switch (op.type()) {
-                case ASSIGN, ASSIGN_DIV, ASSIGN_MINUS, ASSIGN_MOD, ASSIGN_MUL, ASSIGN_PLUS, 
+                case ASSIGN, ASSIGN_DIV, ASSIGN_Negate, ASSIGN_MOD, ASSIGN_MUL, ASSIGN_PLUS, 
                      ASSIGN_SHIFT_LEFT, ASSIGN_SHIFT_RIGHT, ASSIGN_AND, ASSIGN_XOR, ASSIGN_OR -> {
                     this.tokenSource.consume();
                     yield op;
@@ -423,7 +423,7 @@ public class Parser {
      */
     private ExpressionTree parseTerm() {
         ExpressionTree lhs = parseFactor();
-        while (this.tokenSource.peek() instanceof Operator(var type, _) && (type == OperatorType.PLUS || type == OperatorType.MINUS)) {
+        while (this.tokenSource.peek() instanceof Operator(var type, _) && (type == OperatorType.PLUS || type == OperatorType.NEGATE)) {
             this.tokenSource.consume();
             ExpressionTree rhs = parseFactor();
             lhs = new BinaryOperationTree(lhs, rhs, type);
@@ -451,7 +451,7 @@ public class Parser {
      */
     private ExpressionTree parseUnary() {
         return switch (this.tokenSource.peek()) {
-            case Operator(var type, _) when type == OperatorType.NOT || type == OperatorType.BIT_NOT || type == OperatorType.MINUS -> {
+            case Operator(var type, _) when type == OperatorType.NOT || type == OperatorType.COMPLEMENT || type == OperatorType.NEGATE -> {
                 Token token = this.tokenSource.consume();
                 if (!(token instanceof Operator operator)) {
                     throw new ParseException("expected operator but got " + token);

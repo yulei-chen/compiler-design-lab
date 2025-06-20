@@ -17,13 +17,13 @@ public record Operator(OperatorType type, Span span) implements Token {
     public enum OperatorType {
         /* unary operators */
         NOT("!"),
-        BIT_NOT("~"),
-        // MINUS(""),
+        COMPLEMENT("~"),
+        // NEGATE(""),
 
         /* assignment operators */
         ASSIGN("="),
         ASSIGN_PLUS("+="),
-        ASSIGN_MINUS("-="),
+        ASSIGN_Negate("-="),
         ASSIGN_MUL("*="),
         ASSIGN_DIV("/="),
         ASSIGN_MOD("%="),
@@ -35,7 +35,7 @@ public record Operator(OperatorType type, Span span) implements Token {
 
         /* binary operators */
         PLUS("+"),
-        MINUS("-"),
+        NEGATE("-"),
         MUL("*"),
         DIV("/"),
         MOD("%"),

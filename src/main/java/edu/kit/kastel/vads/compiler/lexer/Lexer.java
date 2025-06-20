@@ -37,8 +37,8 @@ public class Lexer {
             case '{' -> separator(SeparatorType.BRACE_OPEN);
             case '}' -> separator(SeparatorType.BRACE_CLOSE);
             case ';' -> separator(SeparatorType.SEMICOLON);
-            case '~' -> new Operator(OperatorType.BIT_NOT, buildSpan(1));
-            case '-' -> match('=') ? new Operator(OperatorType.ASSIGN_MINUS, buildSpan(2)) : new Operator(OperatorType.MINUS, buildSpan(1));
+            case '~' -> new Operator(OperatorType.COMPLEMENT, buildSpan(1));
+            case '-' -> match('=') ? new Operator(OperatorType.ASSIGN_Negate, buildSpan(2)) : new Operator(OperatorType.NEGATE, buildSpan(1));
             case '+' -> match('=') ? new Operator(OperatorType.ASSIGN_PLUS, buildSpan(2)) : new Operator(OperatorType.PLUS, buildSpan(1));
             case '*' -> match('=') ? new Operator(OperatorType.ASSIGN_MUL, buildSpan(2)) : new Operator(OperatorType.MUL, buildSpan(1));
             case '/' -> match('=') ? new Operator(OperatorType.ASSIGN_DIV, buildSpan(2)) : new Operator(OperatorType.DIV, buildSpan(1));

@@ -1,5 +1,6 @@
 package edu.kit.kastel.vads.compiler;
 
+import edu.kit.kastel.vads.compiler.asm.Asm;
 import edu.kit.kastel.vads.compiler.backend.aasm.CodeGenerator;
 import edu.kit.kastel.vads.compiler.backend.regalloc.GraphColoringRegisterAllocator;
 import edu.kit.kastel.vads.compiler.backend.regalloc.AasmToAttAsmTranslator;
@@ -7,6 +8,7 @@ import edu.kit.kastel.vads.compiler.ir.IrGraph;
 import edu.kit.kastel.vads.compiler.ir.SsaTranslation;
 import edu.kit.kastel.vads.compiler.ir.optimize.LocalValueNumbering;
 import edu.kit.kastel.vads.compiler.ir.util.YCompPrinter;
+import edu.kit.kastel.vads.compiler.ir_tac.IrTac;
 import edu.kit.kastel.vads.compiler.ir.util.GraphVizPrinter;
 import edu.kit.kastel.vads.compiler.lexer.Lexer;
 import edu.kit.kastel.vads.compiler.parser.ParseException;
@@ -39,52 +41,60 @@ public class Main {
             System.exit(7);
             return;
         }
-        List<IrGraph> graphs = new ArrayList<>();
-        for (FunctionTree function : program.topLevelTrees()) {
-            SsaTranslation translation = new SsaTranslation(function, new LocalValueNumbering());
-            graphs.add(translation.translate());
-        }
+       
 
-        if ("vcg".equals(System.getenv("DUMP_GRAPHS")) || "vcg".equals(System.getProperty("dumpGraphs"))) {
-            Path tmp = output.toAbsolutePath().resolveSibling("graphs");
-            Files.createDirectories(tmp);
-            for (IrGraph graph : graphs) {
-                dumpGraph(graph, tmp, "before-codegen", "vcg");
-            }
-        }
+        IrTac ir = new IrTac(program);
+        Asm asmAst = new Asm(ir.instructions());
+        String asm = asmAst.toString();
 
-        if ("dot".equals(System.getenv("DUMP_GRAPHS")) || "dot".equals(System.getProperty("dumpGraphs"))) {
-            Path tmp = output.toAbsolutePath().resolveSibling("graphs");
-            Files.createDirectories(tmp);
-            for (IrGraph graph : graphs) {
-                dumpGraph(graph, tmp, "before-codegen", "dot");
-            }
-        }
+
+
+        // List<IrGraph> graphs = new ArrayList<>();
+        // for (FunctionTree function : program.topLevelTrees()) {
+        //     SsaTranslation translation = new SsaTranslation(function, new LocalValueNumbering());
+        //     graphs.add(translation.translate());
+        // }
+
+        // if ("vcg".equals(System.getenv("DUMP_GRAPHS")) || "vcg".equals(System.getProperty("dumpGraphs"))) {
+        //     Path tmp = output.toAbsolutePath().resolveSibling("graphs");
+        //     Files.createDirectories(tmp);
+        //     for (IrGraph graph : graphs) {
+        //         dumpGraph(graph, tmp, "before-codegen", "vcg");
+        //     }
+        // }
+
+        // if ("dot".equals(System.getenv("DUMP_GRAPHS")) || "dot".equals(System.getProperty("dumpGraphs"))) {
+        //     Path tmp = output.toAbsolutePath().resolveSibling("graphs");
+        //     Files.createDirectories(tmp);
+        //     for (IrGraph graph : graphs) {
+        //         dumpGraph(graph, tmp, "before-codegen", "dot");
+        //     }
+        // }
 
         // TODO: generate assembly and invoke gcc instead of generating abstract assembly
-        String aasm = new CodeGenerator().generateCode(graphs);
-        List<String> aasmLines = Arrays.asList(aasm.split("\n"));
-        GraphColoringRegisterAllocator allocator = new GraphColoringRegisterAllocator();
-        java.util.Map<String, String> regMap = allocator.allocate(aasmLines);
-        AasmToAttAsmTranslator translator = new AasmToAttAsmTranslator();
-        String attAsm = translator.translate(aasmLines, regMap);
+        // String aasm = new CodeGenerator().generateCode(graphs);
+        // List<String> aasmLines = Arrays.asList(aasm.split("\n"));
+        // GraphColoringRegisterAllocator allocator = new GraphColoringRegisterAllocator();
+        // java.util.Map<String, String> regMap = allocator.allocate(aasmLines);
+        // AasmToAttAsmTranslator translator = new AasmToAttAsmTranslator();
+        // String attAsm = translator.translate(aasmLines, regMap);
         // 写入临时汇编文件
         Path asmFile = output.resolveSibling(output.getFileName().toString() + ".s");
-        Files.writeString(asmFile, attAsm);
+        Files.writeString(asmFile, asm);
         // 调用gcc编译汇编为可执行文件
-        try {
-            Process gcc = new ProcessBuilder(
-                "gcc", "-no-pie", "-o", output.toString(), asmFile.toString()
-            ).inheritIO().start();
-            int exitCode = gcc.waitFor();
-            if (exitCode != 0) {
-                System.err.println("gcc 编译失败，退出码: " + exitCode);
-                System.exit(8);
-            }
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
-            throw new IOException("gcc 调用被中断", e);
-        }
+        // try {
+        //     Process gcc = new ProcessBuilder(
+        //         "gcc", "-no-pie", "-o", output.toString(), asmFile.toString()
+        //     ).inheritIO().start();
+        //     int exitCode = gcc.waitFor();
+        //     if (exitCode != 0) {
+        //         System.err.println("gcc 编译失败，退出码: " + exitCode);
+        //         System.exit(8);
+        //     }
+        // } catch (InterruptedException e) {
+        //     Thread.currentThread().interrupt();
+        //     throw new IOException("gcc 调用被中断", e);
+        // }
         // 可选：删除临时汇编文件
         // Files.deleteIfExists(asmFile);
     }
