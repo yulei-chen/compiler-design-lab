@@ -16,8 +16,8 @@ import edu.kit.kastel.vads.compiler.asm.node.operand.PseudoAsm;
 public class Liveness {
 
     private List<InstructionAsm> asmInstructions;
-    private Set<String> temps;
-    private HashMap<Integer, HashSet<String>> liveIn;
+    public Set<String> temps;
+    public HashMap<Integer, HashSet<String>> liveIn;
     private HashMap<Integer, HashSet<String>> defMap;
     private HashMap<Integer, HashSet<String>> useMap;
     private HashMap<Integer, HashSet<Integer>> succMap;
@@ -25,13 +25,13 @@ public class Liveness {
     public Liveness(List<InstructionAsm> asmInstructions) {
         this.asmInstructions = asmInstructions;
         this.temps = new HashSet<>();
-        liveIn = new HashMap<>();   
-        defMap = new HashMap<>();
-        useMap = new HashMap<>();
-        succMap = new HashMap<>();
+        this.liveIn = new HashMap<>();   
+        this.defMap = new HashMap<>();
+        this.useMap = new HashMap<>();
+        this.succMap = new HashMap<>();
     }
 
-    public HashMap<Integer, HashSet<String>> backwardAnalyze() {
+    public void backwardAnalyze() {
         for (int i= asmInstructions.size() - 1; i >= 0; i--) {
             InstructionAsm instruction = asmInstructions.get(i);
             formalizeLine(instruction, i);
@@ -43,8 +43,6 @@ public class Liveness {
             InstructionAsm instruction = asmInstructions.get(i);
             analyzeLine(instruction, i);
         }
-
-        return liveIn;
     }
 
     private void formalizeLine(InstructionAsm instruction, Integer lineNumber) {
@@ -120,14 +118,14 @@ public class Liveness {
   
     /*** Predicates  */
 
-    public boolean live(Integer lineNumber, String virtualReg) {
+    public boolean live(Integer lineNumber, String temp) {
         // Space/time trade off for recursive calls
-        if (liveIn.containsKey(lineNumber) && liveIn.get(lineNumber).contains(virtualReg)) {
+        if (liveIn.containsKey(lineNumber) && liveIn.get(lineNumber).contains(temp)) {
             return true;
         }
         
         // K1
-        if (use(lineNumber, virtualReg)) {
+        if (use(lineNumber, temp)) {
             return true;
         }
         
@@ -137,7 +135,7 @@ public class Liveness {
             return false;
         }
         for (Integer succ : succSet) {
-           if (live(succ, virtualReg) && !def(lineNumber, virtualReg)) {
+           if (live(succ, temp) && !def(lineNumber, temp)) {
             return true;
            }
         }
@@ -145,12 +143,12 @@ public class Liveness {
         return false;
     }
 
-    public boolean use(Integer lineNumber, String virtualReg) {
-        return useMap.getOrDefault(lineNumber, new HashSet<>()).contains(virtualReg);
+    public boolean use(Integer lineNumber, String temp) {
+        return useMap.getOrDefault(lineNumber, new HashSet<>()).contains(temp);
     }
 
-    public boolean def(Integer lineNumber, String virtualReg) {
-        return defMap.getOrDefault(lineNumber, new HashSet<>()).contains(virtualReg);
+    public boolean def(Integer lineNumber, String temp) {
+        return defMap.getOrDefault(lineNumber, new HashSet<>()).contains(temp);
     }
 
 }

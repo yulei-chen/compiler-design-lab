@@ -6,4 +6,9 @@ public class StackAsm implements OperandAsm {
     public StackAsm(int offset) {
         this.offset = offset;
     }
+
+    @Override
+    public String toString() {
+        return String.format("-%d(%%rsp)", this.offset);
+    }
 }

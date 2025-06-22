@@ -23,7 +23,7 @@ import edu.kit.kastel.vads.compiler.asm.node.operand.OperandAsm;
 import edu.kit.kastel.vads.compiler.asm.node.operand.PseudoAsm;
 
 public class Asm {
-    private final List<InstructionAsm> asmInstructions;
+    private List<InstructionAsm> asmInstructions;
 
     public Asm(List<Instruction> irInstructions) {
         this.asmInstructions = new ArrayList<InstructionAsm>();
