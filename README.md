@@ -1,3 +1,17 @@
+TODO
+
+- [x] Unary operators (the architecture and register allocation)
+- [ ] Add function instruction
+- [ ] Update stack allocation instructions
+- [ ] Add binary
+- [ ] Add logical and relational operators
+- [ ] Add local variables
+- [ ] If statement and conditional expressions
+- [ ] Compound statements
+- [ ] Loops
+- [ ] Functions
+- [ ] Boolean
+
 # Compiler Design
 
 ## Lexer
