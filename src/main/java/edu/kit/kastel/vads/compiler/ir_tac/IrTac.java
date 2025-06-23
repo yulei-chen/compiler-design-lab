@@ -4,13 +4,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 import edu.kit.kastel.vads.compiler.ir_tac.node.instruction.Binary;
+import edu.kit.kastel.vads.compiler.ir_tac.node.instruction.Copy;
 import edu.kit.kastel.vads.compiler.ir_tac.node.instruction.Instruction;
+import edu.kit.kastel.vads.compiler.ir_tac.node.instruction.Jump;
+import edu.kit.kastel.vads.compiler.ir_tac.node.instruction.JumpIfNotZero;
+import edu.kit.kastel.vads.compiler.ir_tac.node.instruction.JumpIfZero;
+import edu.kit.kastel.vads.compiler.ir_tac.node.instruction.Label;
 import edu.kit.kastel.vads.compiler.ir_tac.node.instruction.Return;
 import edu.kit.kastel.vads.compiler.ir_tac.node.instruction.Unary;
 import edu.kit.kastel.vads.compiler.ir_tac.node.val.Constant;
 import edu.kit.kastel.vads.compiler.ir_tac.node.val.Val;
 import edu.kit.kastel.vads.compiler.ir_tac.node.val.Var;
-import edu.kit.kastel.vads.compiler.ir_tac.utils.MakeTemp;
+import edu.kit.kastel.vads.compiler.ir_tac.utils.Utils;
+import edu.kit.kastel.vads.compiler.lexer.Operator.OperatorType;
 import edu.kit.kastel.vads.compiler.parser.ast.BinaryOperationTree;
 import edu.kit.kastel.vads.compiler.parser.ast.BlockTree;
 import edu.kit.kastel.vads.compiler.parser.ast.ExpressionTree;
@@ -87,19 +93,59 @@ public class IrTac {
 
         public Val visit(UnaryOperationTree unaryOperationTree) {
             Val src = visitor.visit(unaryOperationTree.operand());
-            String dst_name = MakeTemp.makeTemp();
+            String dst_name = Utils.makeTemp();
             Var dst = new Var(dst_name);
             this.instructions.add(new Unary(unaryOperationTree.operatorType(), src, dst));
             return dst;
         }
 
         public Val visit(BinaryOperationTree binaryOperationTree) {
-            Val src1 = visitor.visit(binaryOperationTree.lhs());
-            Val src2 = visitor.visit(binaryOperationTree.rhs());
-            String dst_name = MakeTemp.makeTemp();
-            Var dst = new Var(dst_name);
-            this.instructions.add(new Binary(binaryOperationTree.operatorType(), src1, src2, dst));
-            return dst;
+            OperatorType operatorType = binaryOperationTree.operatorType();
+
+            switch (operatorType) {
+                case AND: {
+                    Val src1 = visitor.visit(binaryOperationTree.lhs());
+                    String falseLabel = Utils.makeLabel();
+                    // short circuiting
+                    this.instructions.add(new JumpIfZero(src1, falseLabel));
+                    Val src2 = visitor.visit(binaryOperationTree.rhs());
+                    this.instructions.add(new JumpIfZero(src2, falseLabel));
+                    String dst_name = Utils.makeTemp();
+                    Var dst = new Var(dst_name);
+                    this.instructions.add(new Copy(new Constant(1), dst));
+                    String endLabel = Utils.makeLabel();
+                    this.instructions.add(new Jump(endLabel));
+                    this.instructions.add(new Label(falseLabel));
+                    this.instructions.add(new Copy(new Constant(0), dst));
+                    this.instructions.add(new Label(endLabel));
+                    return dst;
+                }
+                case OR: {
+                    Val src1 = visitor.visit(binaryOperationTree.lhs());
+                    String trueLabel = Utils.makeLabel();
+                    // short circuiting
+                    this.instructions.add(new JumpIfNotZero(src1, trueLabel));
+                    Val src2 = visitor.visit(binaryOperationTree.rhs());
+                    this.instructions.add(new JumpIfNotZero(src2, trueLabel));
+                    String dst_name = Utils.makeTemp();
+                    Var dst = new Var(dst_name);
+                    this.instructions.add(new Copy(new Constant(0), dst));
+                    String endLabel = Utils.makeLabel();
+                    this.instructions.add(new Jump(endLabel));
+                    this.instructions.add(new Label(trueLabel));
+                    this.instructions.add(new Copy(new Constant(1), dst));
+                    this.instructions.add(new Label(endLabel));
+                    return dst;
+                }
+                default: {
+                    Val src1 = visitor.visit(binaryOperationTree.lhs());
+                    Val src2 = visitor.visit(binaryOperationTree.rhs());
+                    String dst_name = Utils.makeTemp();
+                    Var dst = new Var(dst_name);
+                    this.instructions.add(new Binary(binaryOperationTree.operatorType(), src1, src2, dst));
+                    return dst;
+                }
+            }
         }
     }
 }
