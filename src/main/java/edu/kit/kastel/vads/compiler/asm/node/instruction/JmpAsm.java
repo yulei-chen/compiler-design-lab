@@ -4,27 +4,25 @@ import java.util.List;
 
 import edu.kit.kastel.vads.compiler.asm.node.operand.OperandAsm;
 
-public class Idiv implements InstructionAsm {
-    private OperandAsm operand;
+public class JmpAsm implements InstructionAsm {
+    private final String target;
 
-    public Idiv(OperandAsm operand) {
-        this.operand = operand;
+    public JmpAsm(String target) {
+        this.target = target;
     }
 
     @Override
     public List<OperandAsm> getOperands() {
-        return List.of(operand);
+        return List.of();
     }
 
     @Override
     public void setOperand(int index, OperandAsm operand) {
-        if (index == 0) {
-            this.operand = operand;
-        }
+        throw new UnsupportedOperationException("Jmp does not have operands");
     }
 
     @Override
     public String toString() {
-        return "idivl " + operand.toString();
+        return "jmp ." + target;
     }
 }

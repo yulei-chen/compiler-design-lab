@@ -4,7 +4,7 @@ import java.util.List;
 
 import edu.kit.kastel.vads.compiler.asm.node.operand.OperandAsm;
 
-public class Cdq implements InstructionAsm {
+public class CdqAsm implements InstructionAsm {
     @Override
     public String toString() {
         return "cdq";

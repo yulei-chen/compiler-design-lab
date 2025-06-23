@@ -7,6 +7,10 @@ public class RegAsm implements OperandAsm {
         this.reg = type;
     }
 
+    public String toOneByteString() {
+        return reg.toOneByteString();
+    }
+
     @Override
     public String toString() {
         return reg.toString();
