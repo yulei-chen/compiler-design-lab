@@ -3,6 +3,7 @@ package edu.kit.kastel.vads.compiler.ir_tac;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.kit.kastel.vads.compiler.ir_tac.node.instruction.Binary;
 import edu.kit.kastel.vads.compiler.ir_tac.node.instruction.Instruction;
 import edu.kit.kastel.vads.compiler.ir_tac.node.instruction.Return;
 import edu.kit.kastel.vads.compiler.ir_tac.node.instruction.Unary;
@@ -10,6 +11,7 @@ import edu.kit.kastel.vads.compiler.ir_tac.node.val.Constant;
 import edu.kit.kastel.vads.compiler.ir_tac.node.val.Val;
 import edu.kit.kastel.vads.compiler.ir_tac.node.val.Var;
 import edu.kit.kastel.vads.compiler.ir_tac.utils.MakeTemp;
+import edu.kit.kastel.vads.compiler.parser.ast.BinaryOperationTree;
 import edu.kit.kastel.vads.compiler.parser.ast.BlockTree;
 import edu.kit.kastel.vads.compiler.parser.ast.ExpressionTree;
 import edu.kit.kastel.vads.compiler.parser.ast.FunctionTree;
@@ -74,6 +76,9 @@ public class IrTac {
                 case UnaryOperationTree unaryOperationTree -> {
                     return visitor.visit(unaryOperationTree);
                 }
+                case BinaryOperationTree binaryOperationTree -> {
+                    return visitor.visit(binaryOperationTree);
+                }
                 default -> throw new IllegalArgumentException("Unknown expression type: " + expressionTree.getClass().getName());
             }
         }
@@ -87,6 +92,14 @@ public class IrTac {
             this.instructions.add(new Unary(unaryOperationTree.operatorType(), src, dst));
             return dst;
         }
-        
+
+        public Val visit(BinaryOperationTree binaryOperationTree) {
+            Val src1 = visitor.visit(binaryOperationTree.lhs());
+            Val src2 = visitor.visit(binaryOperationTree.rhs());
+            String dst_name = MakeTemp.makeTemp();
+            Var dst = new Var(dst_name);
+            this.instructions.add(new Binary(binaryOperationTree.operatorType(), src1, src2, dst));
+            return dst;
+        }
     }
 }

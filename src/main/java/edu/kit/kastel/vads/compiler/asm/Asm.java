@@ -3,9 +3,14 @@ package edu.kit.kastel.vads.compiler.asm;
 import java.util.ArrayList;
 import java.util.List;
 
+import edu.kit.kastel.vads.compiler.asm.node.instruction.BinaryAsm;
+import edu.kit.kastel.vads.compiler.asm.node.instruction.BinaryOperator;
+import edu.kit.kastel.vads.compiler.asm.node.instruction.Cdq;
+import edu.kit.kastel.vads.compiler.asm.node.instruction.Idiv;
 import edu.kit.kastel.vads.compiler.asm.node.instruction.InstructionAsm;
 import edu.kit.kastel.vads.compiler.asm.node.instruction.MovAsm;
 import edu.kit.kastel.vads.compiler.asm.node.instruction.RetAsm;
+import edu.kit.kastel.vads.compiler.ir_tac.node.instruction.Binary;
 import edu.kit.kastel.vads.compiler.ir_tac.node.instruction.Instruction;
 import edu.kit.kastel.vads.compiler.ir_tac.node.instruction.Return;
 import edu.kit.kastel.vads.compiler.ir_tac.node.instruction.Unary;
@@ -41,6 +46,9 @@ public class Asm {
             case Unary irUnary -> {
                 return generateUnary(irUnary);
             }
+            case Binary irBinary -> {
+                return generateBinary(irBinary);
+            }
             default -> throw new IllegalArgumentException("Unknown instruction type: " + irInstruction.getClass().getName());
         }
     }
@@ -73,6 +81,50 @@ public class Asm {
                 return UnaryOperator.NOT;
             }
             default -> throw new IllegalArgumentException("Unknown unary operator: " + irOperator.getClass().getName());
+        }
+    }
+
+    private List<InstructionAsm> generateBinary(Binary irBinary) {
+        OperandAsm src1 = generateOperand(irBinary.src1());
+        OperandAsm src2 = generateOperand(irBinary.src2());
+        OperandAsm dst = generateOperand(irBinary.dst());
+        OperatorType irOp = irBinary.operator();
+
+        if (irOp == OperatorType.DIV) {
+            return List.of(
+                new MovAsm(src1, new RegAsm(RegType.AX)),
+                new Cdq(),
+                new Idiv(src2),
+                new MovAsm(new RegAsm(RegType.AX), dst)
+            );
+        } else if (irOp == OperatorType.MOD) {
+            return List.of(
+                new MovAsm(src1, new RegAsm(RegType.AX)),
+                new Cdq(),
+                new Idiv(src2),
+                new MovAsm(new RegAsm(RegType.DX), dst)
+            );
+        } else {
+            BinaryOperator operator = generateBinaryOperator(irBinary.operator());
+            return List.of(
+                new MovAsm(src1, dst),
+                new BinaryAsm(operator, src2, dst)
+            );
+        }
+    }
+
+    private BinaryOperator generateBinaryOperator(OperatorType irOperator) {
+        switch (irOperator) {
+            case PLUS -> {
+                return BinaryOperator.ADD;
+            }
+            case NEGATE -> {
+                return BinaryOperator.SUB;
+            }
+            case MUL -> {
+                return BinaryOperator.MUL;
+            }
+            default -> throw new IllegalArgumentException("Unknown binary operator: " + irOperator.getClass().getName());
         }
     }
 
