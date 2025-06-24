@@ -1,18 +1,20 @@
 package edu.kit.kastel.vads.compiler.asm.node.operand;
 
-public class ImmAsm implements OperandAsm {
-    private final int value;
+import java.util.OptionalLong;
 
-    public ImmAsm(int value) {
+public class ImmAsm implements OperandAsm {
+    private final OptionalLong value;
+
+    public ImmAsm(OptionalLong value) {
         this.value = value;
     }
 
-    public int value() {
+    public OptionalLong value() {
         return value;
     }
 
     @Override
     public String toString() {
-        return "$" + value;
+        return "$" + value.orElse(0L);
     }
 }

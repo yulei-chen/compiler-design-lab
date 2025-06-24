@@ -2,6 +2,7 @@ package edu.kit.kastel.vads.compiler.asm;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.OptionalLong;
 
 import edu.kit.kastel.vads.compiler.asm.node.instruction.BinaryAsm;
 import edu.kit.kastel.vads.compiler.asm.node.instruction.BinaryOperator;
@@ -94,9 +95,9 @@ public class Asm {
         switch (irUnary.operator()) {
             case NOT -> {
                 return List.of(
-                    new CmpAsm(new ImmAsm(0), src),
+                    new CmpAsm(new ImmAsm(OptionalLong.of(0)), src),
                     // HACK: zero out*
-                    new MovAsm(new ImmAsm(0), dst),
+                    new MovAsm(new ImmAsm(OptionalLong.of(0)), dst),
                     new SetCCAsm(CondCode.E, dst)
                 );
             }
@@ -150,7 +151,7 @@ public class Asm {
                     // NOTE: src1 and src2 are swapped here
                     new CmpAsm(src2, src1),
                     // HACK: zero out*
-                    new MovAsm(new ImmAsm(0), dst),
+                    new MovAsm(new ImmAsm(OptionalLong.of(0)), dst),
                     new SetCCAsm(CondCode.E, dst)
                 );
             }
@@ -159,7 +160,7 @@ public class Asm {
                     // NOTE: src1 and src2 are swapped here
                     new CmpAsm(src2, src1),
                     // HACK: zero out*
-                    new MovAsm(new ImmAsm(0), dst),
+                    new MovAsm(new ImmAsm(OptionalLong.of(0)), dst),
                     new SetCCAsm(CondCode.NE, dst)
                 );
             }
@@ -168,7 +169,7 @@ public class Asm {
                     // NOTE: src1 and src2 are swapped here
                     new CmpAsm(src2, src1),
                     // HACK: zero out*
-                    new MovAsm(new ImmAsm(0), dst),
+                    new MovAsm(new ImmAsm(OptionalLong.of(0)), dst),
                     new SetCCAsm(CondCode.G, dst)
                 );
             }
@@ -177,16 +178,15 @@ public class Asm {
                     // NOTE: src1 and src2 are swapped here
                     new CmpAsm(src2, src1),
                     // HACK: zero out*
-                    new MovAsm(new ImmAsm(0), dst),
+                    new MovAsm(new ImmAsm(OptionalLong.of(0)), dst),
                     new SetCCAsm(CondCode.GE, dst)
                 );
             }
             case LESS -> {
                 return List.of(
-                    // NOTE: src1 and src2 are swapped here
                     new CmpAsm(src2, src1),
                     // HACK: zero out*
-                    new MovAsm(new ImmAsm(0), dst),
+                    new MovAsm(new ImmAsm(OptionalLong.of(0)), dst),
                     new SetCCAsm(CondCode.L, dst)
                 );
             }
@@ -195,7 +195,7 @@ public class Asm {
                     // NOTE: src1 and src2 are swapped here
                     new CmpAsm(src2, src1),
                     // HACK: zero out*
-                    new MovAsm(new ImmAsm(0), dst),
+                    new MovAsm(new ImmAsm(OptionalLong.of(0)), dst),
                     new SetCCAsm(CondCode.LE, dst)
                 );
             }
@@ -235,7 +235,7 @@ public class Asm {
         OperandAsm condition = generateOperand(irJumpIfZero.condition());
         String target = irJumpIfZero.target();
         return List.of(
-            new CmpAsm(new ImmAsm(0), condition),
+            new CmpAsm(new ImmAsm(OptionalLong.of(0)), condition),
             new JmpCCAsm(CondCode.E, target)
         );
     }
@@ -244,7 +244,7 @@ public class Asm {
         OperandAsm condition = generateOperand(irJumpIfNotZero.condition());
         String target = irJumpIfNotZero.target();
         return List.of(
-            new CmpAsm(new ImmAsm(0), condition),
+            new CmpAsm(new ImmAsm(OptionalLong.of(0)), condition),
             new JmpCCAsm(CondCode.NE, target)
         );
     }

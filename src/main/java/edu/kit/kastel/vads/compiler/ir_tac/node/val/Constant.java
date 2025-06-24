@@ -1,17 +1,15 @@
 package edu.kit.kastel.vads.compiler.ir_tac.node.val;
 
-public class Constant implements Val {
-    private final int value;
+import java.util.OptionalLong;
 
-    public Constant(int value) {
+public class Constant implements Val {
+    private final OptionalLong value;
+
+    public Constant(OptionalLong value) {
         this.value = value;
     }
 
-    public Constant(String value) {
-        this.value = Integer.parseInt(value);
-    }
-
-    public int value() {
+    public OptionalLong value() {
         return value;
     }
 }
