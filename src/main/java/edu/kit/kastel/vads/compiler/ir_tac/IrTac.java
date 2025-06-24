@@ -21,10 +21,12 @@ import edu.kit.kastel.vads.compiler.lexer.Operator.OperatorType;
 import edu.kit.kastel.vads.compiler.parser.ast.AssignmentTree;
 import edu.kit.kastel.vads.compiler.parser.ast.BinaryOperationTree;
 import edu.kit.kastel.vads.compiler.parser.ast.BlockTree;
+import edu.kit.kastel.vads.compiler.parser.ast.ConditionalTree;
 import edu.kit.kastel.vads.compiler.parser.ast.DeclarationTree;
 import edu.kit.kastel.vads.compiler.parser.ast.ExpressionTree;
 import edu.kit.kastel.vads.compiler.parser.ast.FunctionTree;
 import edu.kit.kastel.vads.compiler.parser.ast.IdentExpressionTree;
+import edu.kit.kastel.vads.compiler.parser.ast.IfTree;
 import edu.kit.kastel.vads.compiler.parser.ast.LValueIdentTree;
 import edu.kit.kastel.vads.compiler.parser.ast.LValueTree;
 import edu.kit.kastel.vads.compiler.parser.ast.LiteralTree;
@@ -70,16 +72,26 @@ public class IrTac {
 
         public void visit(StatementTree statement) {
             switch (statement) {
-                case ReturnTree returnTree -> {
-                    visitor.visit(returnTree);
-                }
+                /* simp (end with `;` ) */
                 case AssignmentTree assignmentTree -> {
                     visitor.visit(assignmentTree);
                 }
                 case DeclarationTree declarationTree -> {
                     visitor.visit(declarationTree);
                 }
-                // TODO: control | block
+
+                /* control  */
+                case IfTree ifTree -> {
+                    visitor.visit(ifTree);
+                }
+                case ReturnTree returnTree -> {
+                    visitor.visit(returnTree);
+                }
+
+                /* block */
+                case BlockTree blockTree -> {
+                    visitor.visit(blockTree);
+                }
                 default -> {
                     throw new IllegalArgumentException("Unknown statement type: " + statement.getClass().getName());
                 }
@@ -143,6 +155,30 @@ public class IrTac {
             this.instructions.add(new Copy(rhs, dst));
         }
 
+        public void visit(IfTree ifTree) {
+            if (ifTree.elseStatement() == null) {
+                // Only if
+                String endLabel = Utils.makeLabel();
+
+                Val condition = visitor.visit(ifTree.condition());
+                this.instructions.add(new JumpIfZero(condition, endLabel));
+                visitor.visit(ifTree.thenStatement());
+                this.instructions.add(new Label(endLabel));
+            } else {
+                // If-Else
+                String elseLabel = Utils.makeLabel();
+                String endLabel = Utils.makeLabel();
+
+                Val condition = visitor.visit(ifTree.condition());
+                this.instructions.add(new JumpIfZero(condition, elseLabel));
+                visitor.visit(ifTree.thenStatement());
+                this.instructions.add(new Jump(endLabel));
+                this.instructions.add(new Label(elseLabel));
+                visitor.visit(ifTree.elseStatement());
+                this.instructions.add(new Label(endLabel));
+            }
+        }
+
         ////// Expressions Start //////
         
         public Val visit(ExpressionTree expressionTree) {
@@ -158,6 +194,9 @@ public class IrTac {
                 }
                 case IdentExpressionTree identExpressionTree -> {
                     return new Var(identExpressionTree.name().name().asString());
+                }
+                case ConditionalTree conditionalTree -> {
+                    return visitor.visit(conditionalTree);
                 }
                 default -> throw new IllegalArgumentException("Unknown expression type: " + expressionTree.getClass().getName());
             }
@@ -218,6 +257,23 @@ public class IrTac {
                     return dst;
                 }
             }
+        }
+
+        public Val visit(ConditionalTree conditionalTree) {
+            String falseLabel = Utils.makeLabel();
+            String endLabel = Utils.makeLabel();
+            Var result = new Var(Utils.makeTemp());
+
+            Val condition = visitor.visit(conditionalTree.condition());
+            this.instructions.add(new JumpIfZero(condition, falseLabel));
+            Val trueBranch = visitor.visit(conditionalTree.trueBranch());
+            this.instructions.add(new Copy(trueBranch, result));
+            this.instructions.add(new Jump(endLabel));
+            this.instructions.add(new Label(falseLabel));
+            Val falseBranch = visitor.visit(conditionalTree.falseBranch());
+            this.instructions.add(new Copy(falseBranch, result));
+            this.instructions.add(new Label(endLabel));
+            return result;
         }
     }
 }
