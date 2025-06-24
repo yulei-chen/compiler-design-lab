@@ -23,7 +23,7 @@ public record Operator(OperatorType type, Span span) implements Token {
         /* assignment operators */
         ASSIGN("="),
         ASSIGN_PLUS("+="),
-        ASSIGN_Negate("-="),
+        ASSIGN_NEGATE("-="),
         ASSIGN_MUL("*="),
         ASSIGN_DIV("/="),
         ASSIGN_MOD("%="),

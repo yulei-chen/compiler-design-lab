@@ -94,7 +94,33 @@ public class IrTac {
         public void visit(AssignmentTree assignmentTree) {
             Val rhs = visitor.visit(assignmentTree.expression());
             Var lhs = visitor.visit(assignmentTree.lValue());
-            this.instructions.add(new Copy(rhs, lhs));
+            OperatorType operatorType = assignmentTree.operator().type();
+            switch (operatorType) {
+                case ASSIGN -> {
+                    this.instructions.add(new Copy(rhs, lhs));
+                }
+                case ASSIGN_PLUS -> {
+                    this.instructions.add(new Binary(OperatorType.PLUS, lhs, rhs, lhs));
+                }
+                case ASSIGN_NEGATE -> {
+                    this.instructions.add(new Binary(OperatorType.NEGATE, lhs, rhs, lhs));
+                }
+                case ASSIGN_MUL -> {
+                    this.instructions.add(new Binary(OperatorType.MUL, lhs, rhs, lhs));
+                }
+                case ASSIGN_DIV -> {
+                    this.instructions.add(new Binary(OperatorType.DIV, lhs, rhs, lhs));
+                }
+                case ASSIGN_MOD -> {
+                    this.instructions.add(new Binary(OperatorType.MOD, lhs, rhs, lhs));
+                }
+                case ASSIGN_AND -> {
+                    this.instructions.add(new Binary(OperatorType.AND, lhs, rhs, lhs));
+                }
+                default -> {
+                    throw new IllegalArgumentException("Unknown assignment operator: " + operatorType);
+                }
+            }
         }
 
         public Var visit(LValueTree lValueTree) {
