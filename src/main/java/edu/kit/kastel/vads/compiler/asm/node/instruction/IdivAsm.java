@@ -25,6 +25,6 @@ public class IdivAsm implements InstructionAsm {
 
     @Override
     public String toString() {
-        return "idiv " + operand.toString();
+        return "idivl " + operand.toString();
     }
 }
