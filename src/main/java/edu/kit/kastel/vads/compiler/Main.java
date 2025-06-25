@@ -53,13 +53,10 @@ public class Main {
         .text
         main:
         call _main
-        ; move the return value into the first argument for the syscall
         movq %rax, %rdi
-        ; move the exit syscall number into rax
         movq $0x3C, %rax
         syscall
         _main:
-        ; your generated code here
         """;
 
 
@@ -95,7 +92,7 @@ public class Main {
         // String attAsm = translator.translate(aasmLines, regMap);
         // 写入临时汇编文件
         Path asmFile = output.resolveSibling(output.getFileName().toString() + ".s");
-        Files.writeString(asmFile, starter + "\n" + asm);
+        Files.writeString(asmFile, starter + asm);
         // 调用gcc编译汇编为可执行文件
         try {
             Process gcc = new ProcessBuilder(
