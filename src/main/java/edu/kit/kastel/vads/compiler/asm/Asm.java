@@ -134,7 +134,9 @@ public class Asm {
                 return List.of(
                     new MovAsm(src1, new RegAsm(RegType.AX)),
                     new CdqAsm(),
-                    new IdivAsm(src2),
+                    // NOTE: imm operand is not supported by `idiv` instruction
+                    new MovAsm(src2, new RegAsm(RegType.BX)),
+                    new IdivAsm(new RegAsm(RegType.BX)),
                     new MovAsm(new RegAsm(RegType.AX), dst)
                 );
             }
@@ -142,7 +144,9 @@ public class Asm {
                 return List.of(
                     new MovAsm(src1, new RegAsm(RegType.AX)),
                     new CdqAsm(),
-                    new IdivAsm(src2),
+                    // NOTE: imm operand is not supported by `idiv` instruction
+                    new MovAsm(src2, new RegAsm(RegType.BX)),
+                    new IdivAsm(new RegAsm(RegType.BX)),
                     new MovAsm(new RegAsm(RegType.DX), dst)
                 );
             }

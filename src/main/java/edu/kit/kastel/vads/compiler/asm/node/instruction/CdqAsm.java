@@ -7,8 +7,8 @@ import edu.kit.kastel.vads.compiler.asm.node.operand.OperandAsm;
 public class CdqAsm implements InstructionAsm {
     @Override
     public String toString() {
-        // return "cdq";
-        return "cltd";
+        return "cdq";
+        // return "cltd";
     }
 
     @Override
