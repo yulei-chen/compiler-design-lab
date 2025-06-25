@@ -7,10 +7,10 @@ TODO
 - [x] Add logical and relational operators
 - [ ] Add local variables
 - [x] Declaration
-- [ ] Increment, Decrement(+=, -=, \*=, /=)
-- [ ] If statement and conditional expressions
+- [x] Increment, Decrement(+=, -=, \*=, /=)
+- [x] If statement and conditional expressions
 - [ ] Compound statements
-- [ ] Loops
+- [x] Loops
 - [ ] Functions
 - [x] Boolean
 - [x] Hexadecimal
