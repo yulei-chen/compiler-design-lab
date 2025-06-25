@@ -47,6 +47,21 @@ public class Main {
         Asm asmAst = new Asm(ir.instructions());
         String asm = asmAst.toString();
 
+        String starter =    """
+        .global main
+        .global _main
+        .text
+        main:
+        call _main
+        ; move the return value into the first argument for the syscall
+        movq %rax, %rdi
+        ; move the exit syscall number into rax
+        movq $0x3C, %rax
+        syscall
+        _main:
+        ; your generated code here
+        """;
+
 
 
         // List<IrGraph> graphs = new ArrayList<>();
@@ -80,21 +95,21 @@ public class Main {
         // String attAsm = translator.translate(aasmLines, regMap);
         // 写入临时汇编文件
         Path asmFile = output.resolveSibling(output.getFileName().toString() + ".s");
-        Files.writeString(asmFile, asm);
+        Files.writeString(asmFile, starter + "\n" + asm);
         // 调用gcc编译汇编为可执行文件
-        // try {
-        //     Process gcc = new ProcessBuilder(
-        //         "gcc", "-no-pie", "-o", output.toString(), asmFile.toString()
-        //     ).inheritIO().start();
-        //     int exitCode = gcc.waitFor();
-        //     if (exitCode != 0) {
-        //         System.err.println("gcc 编译失败，退出码: " + exitCode);
-        //         System.exit(8);
-        //     }
-        // } catch (InterruptedException e) {
-        //     Thread.currentThread().interrupt();
-        //     throw new IOException("gcc 调用被中断", e);
-        // }
+        try {
+            Process gcc = new ProcessBuilder(
+                "gcc", "-no-pie", "-o", output.toString(), asmFile.toString()
+            ).inheritIO().start();
+            int exitCode = gcc.waitFor();
+            if (exitCode != 0) {
+                System.err.println("gcc 编译失败，退出码: " + exitCode);
+                System.exit(8);
+            }
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
+            throw new IOException("gcc 调用被中断", e);
+        }
         // 可选：删除临时汇编文件
         // Files.deleteIfExists(asmFile);
     }
