@@ -224,7 +224,7 @@ public class IrTac {
                 "continueLabel", continueLabel,
                 "breakLabel", breakLabel
             ));
-            this.instructions.add(new Jump(continueLabel));
+            this.instructions.add(new Label(continueLabel));
             visitor.visit(forTree.step(), Map.of());
             this.instructions.add(new Jump(startLabel));
             this.instructions.add(new Label(breakLabel));
