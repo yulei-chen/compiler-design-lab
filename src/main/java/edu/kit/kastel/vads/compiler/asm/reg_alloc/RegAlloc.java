@@ -50,7 +50,7 @@ public class RegAlloc {
         InterferenceGraph graph = new InterferenceGraph();
 
         // Add nodes
-        for (String temp : liveness.temps) {
+        for (String temp : liveness.virtualRegs) {
             graph.addNode(temp);
         }
         
