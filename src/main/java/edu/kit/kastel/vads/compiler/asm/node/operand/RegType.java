@@ -3,7 +3,7 @@ package edu.kit.kastel.vads.compiler.asm.node.operand;
 public enum RegType {
     AX, // ret, div, mod
     BX, // div, mod
-    CX, // mov, binary
+    CX, // mov, binary, cmp
     DX, // mod
     SI,
     DI,
