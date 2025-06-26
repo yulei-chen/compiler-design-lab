@@ -46,6 +46,7 @@ public class Main {
         IrTac ir = new IrTac(program);
         Asm asmAst = new Asm(ir.instructions());
         String asm = asmAst.toString();
+        System.out.println(asm);
 
         String starter =    """
         .global main

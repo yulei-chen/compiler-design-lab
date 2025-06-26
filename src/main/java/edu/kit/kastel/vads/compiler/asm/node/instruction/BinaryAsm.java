@@ -3,6 +3,9 @@ package edu.kit.kastel.vads.compiler.asm.node.instruction;
 import java.util.List;
 
 import edu.kit.kastel.vads.compiler.asm.node.operand.OperandAsm;
+import edu.kit.kastel.vads.compiler.asm.node.operand.RegAsm;
+import edu.kit.kastel.vads.compiler.asm.node.operand.RegType;
+import edu.kit.kastel.vads.compiler.asm.node.operand.StackAsm;
 
 public class BinaryAsm implements InstructionAsm {
     private BinaryOperator operator;
@@ -17,7 +20,12 @@ public class BinaryAsm implements InstructionAsm {
 
     @Override
     public String toString() {
-        return operator.toString() + " " + src.toString() + ", " + dst.toString();
+        if (src instanceof StackAsm && dst instanceof StackAsm) {
+            return "movl " + src.toString() + ", " + new RegAsm(RegType.CX).toString() + "\n" +
+                   operator.toString() + " " + new RegAsm(RegType.CX).toString() + ", " + dst.toString();
+        } else {
+            return operator.toString() + " " + src.toString() + ", " + dst.toString();
+        }
     }
 
     @Override

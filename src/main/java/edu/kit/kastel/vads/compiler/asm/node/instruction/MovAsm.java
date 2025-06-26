@@ -3,6 +3,9 @@ package edu.kit.kastel.vads.compiler.asm.node.instruction;
 import java.util.List;
 
 import edu.kit.kastel.vads.compiler.asm.node.operand.OperandAsm;
+import edu.kit.kastel.vads.compiler.asm.node.operand.RegAsm;
+import edu.kit.kastel.vads.compiler.asm.node.operand.RegType;
+import edu.kit.kastel.vads.compiler.asm.node.operand.StackAsm;
 
 public class MovAsm implements InstructionAsm {
     private OperandAsm src;
@@ -23,7 +26,12 @@ public class MovAsm implements InstructionAsm {
 
     @Override
     public String toString() {
-        return "movl " + src.toString() + ", " + dst.toString();
+        if (src instanceof StackAsm && dst instanceof StackAsm) {
+            return "movl " + src.toString() + ", " + new RegAsm(RegType.CX).toString() + "\n" +
+                   "movl " + new RegAsm(RegType.CX).toString() + ", " + dst.toString();
+        } else {
+            return "movl " + src.toString() + ", " + dst.toString();
+        }
     }
 
     @Override
