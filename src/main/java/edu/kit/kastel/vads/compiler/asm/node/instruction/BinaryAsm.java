@@ -20,7 +20,13 @@ public class BinaryAsm implements InstructionAsm {
 
     @Override
     public String toString() {
-        if (src instanceof StackAsm && dst instanceof StackAsm) {
+        // NOTE: the dst of `imull` instruction can't be stack operands
+        if (operator == BinaryOperator.MUL) {
+            return "movl " + dst.toString() + ", " + new RegAsm(RegType.CX).toString() + "\n" +
+                   "imull " + src.toString() + ", " + new RegAsm(RegType.CX).toString() + "\n" +
+                   "movl " + new RegAsm(RegType.CX).toString() + ", " + dst.toString();
+        // NOTE: stack can't be used as src and dst at the same time for other binary instructions
+        } else if (src instanceof StackAsm && dst instanceof StackAsm) {
             return "movl " + src.toString() + ", " + new RegAsm(RegType.CX).toString() + "\n" +
                    operator.toString() + " " + new RegAsm(RegType.CX).toString() + ", " + dst.toString();
         } else {

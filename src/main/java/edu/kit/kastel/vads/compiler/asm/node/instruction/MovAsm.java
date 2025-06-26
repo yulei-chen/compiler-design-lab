@@ -26,6 +26,7 @@ public class MovAsm implements InstructionAsm {
 
     @Override
     public String toString() {
+        // NOTE: stack can't be used as src and dst at the same time for `movl` instruction
         if (src instanceof StackAsm && dst instanceof StackAsm) {
             return "movl " + src.toString() + ", " + new RegAsm(RegType.CX).toString() + "\n" +
                    "movl " + new RegAsm(RegType.CX).toString() + ", " + dst.toString();
