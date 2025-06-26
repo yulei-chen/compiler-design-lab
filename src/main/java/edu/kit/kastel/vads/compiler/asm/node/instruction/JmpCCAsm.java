@@ -13,6 +13,10 @@ public class JmpCCAsm implements InstructionAsm {
         this.target = target;
     }
 
+    public String target() {
+        return target;
+    }
+
     @Override
     public List<OperandAsm> getOperands() {
         return List.of();

@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Set;
 
 import edu.kit.kastel.vads.compiler.asm.node.instruction.InstructionAsm;
+import edu.kit.kastel.vads.compiler.asm.node.instruction.JmpAsm;
+import edu.kit.kastel.vads.compiler.asm.node.instruction.JmpCCAsm;
 import edu.kit.kastel.vads.compiler.asm.node.instruction.MovAsm;
 import edu.kit.kastel.vads.compiler.asm.node.instruction.UnaryAsm;
 import edu.kit.kastel.vads.compiler.asm.node.operand.PseudoAsm;
@@ -48,26 +50,28 @@ public class Liveness {
     private void formalizeLine(InstructionAsm instruction, Integer lineNumber) {
 
         // %temp.0 = ...
-        // if (instruction instanceof DeclarationAsm) {
-        //     if (!defMap.containsKey(lineNumber)) {
-        //         defMap.put(lineNumber, new HashSet<>());
-        //     }  
-        //     defMap.get(lineNumber).add(instruction.dst());
-        // }
+        if (instruction instanceof MovAsm movAsm) {
+            if (!defMap.containsKey(lineNumber)) {
+                defMap.put(lineNumber, new HashSet<>());
+            }  
+            if (movAsm.dst() instanceof PseudoAsm pseudoAsm) {
+                defMap.get(lineNumber).add(pseudoAsm.identifier());
+            }
+        }
 
         // goto ...
-        // if (instruction instanceof GotoAsm) {
-        //     int succ = Integer.parseInt(instruction.dst());
-        //     if (!succMap.containsKey(lineNumber)) {
-        //         succMap.put(lineNumber, new HashSet<>());
-        //     }
-        //     succMap.get(lineNumber).add(succ);
-        // } else {
-        //     if (!succMap.containsKey(lineNumber)) {
-        //         succMap.put(lineNumber, new HashSet<>());
-        //     }
-        //     succMap.get(lineNumber).add(lineNumber + 1);
-        // }
+        if (instruction instanceof JmpAsm || instruction instanceof JmpCCAsm) {
+            String succ = ((JmpAsm) instruction).target();
+            if (!succMap.containsKey(lineNumber)) {
+                succMap.put(lineNumber, new HashSet<>());
+            }
+            succMap.get(lineNumber).add(Integer.parseInt(succ));
+        } else {
+            if (!succMap.containsKey(lineNumber)) {
+                succMap.put(lineNumber, new HashSet<>());
+            }
+            succMap.get(lineNumber).add(lineNumber + 1);
+        }
 
         if (!succMap.containsKey(lineNumber)) {
             succMap.put(lineNumber, new HashSet<>());

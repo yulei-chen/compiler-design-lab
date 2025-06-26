@@ -104,8 +104,8 @@ public class RegAlloc {
             List<OperandAsm> operands = instruction.getOperands();
             for (int i = 0; i < operands.size(); i++) {
                 if (operands.get(i) instanceof PseudoAsm pseudoAsm) {
-                    RegAsm reg = (RegAsm) this.allocation.get(pseudoAsm.identifier());
-                    instruction.setOperand(i, reg);
+                    OperandAsm regOrStack = this.allocation.get(pseudoAsm.identifier());
+                    instruction.setOperand(i, regOrStack);
                 }
             }
         }

@@ -162,9 +162,14 @@ public class IrTac {
 
         public void visit(DeclarationTree declarationTree, Map<String, String> data) {
             // NOTE: "declare" is not an instruction in IR/Asm, we regard it as a assignment
-            Val rhs = visitor.visit(declarationTree.initializer(), data);
-            Var dst = visitor.visit(declarationTree.name(), data);
-            this.instructions.add(new Copy(rhs, dst));
+            if (declarationTree.initializer() != null) {
+                Val rhs = visitor.visit(declarationTree.initializer(), data);
+                Var dst = visitor.visit(declarationTree.name(), data);
+                this.instructions.add(new Copy(rhs, dst));
+            } else {
+                Var dst = visitor.visit(declarationTree.name(), data);
+                this.instructions.add(new Copy(new Constant(OptionalLong.of(0)), dst));
+            }
         }
 
         public void visit(IfTree ifTree, Map<String, String> data) {
