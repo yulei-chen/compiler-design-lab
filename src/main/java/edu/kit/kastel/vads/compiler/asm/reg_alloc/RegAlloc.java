@@ -45,7 +45,7 @@ public class RegAlloc {
 
     public InterferenceGraph buildInterferenceGraph() {
         Liveness liveness = new Liveness(asmInstructions);
-        liveness.backwardAnalyze();
+        // liveness.backwardAnalyze();
         
         InterferenceGraph graph = new InterferenceGraph();
 
@@ -55,12 +55,10 @@ public class RegAlloc {
         }
         
         // Add edges
-        for (HashSet<String> liveRegsAtTheSameTime : liveness.liveIn.values()) {
-            for (String reg1 : liveRegsAtTheSameTime) {
-                for (String reg2 : liveRegsAtTheSameTime) {
-                    if (reg1.equals(reg2)) continue;
-                    graph.addEdge(reg1, reg2);
-                }
+        for (String reg1 : liveness.virtualRegs) {
+            for (String reg2 : liveness.virtualRegs) {
+                if (reg1.equals(reg2)) continue;
+                graph.addEdge(reg1, reg2);
             }
         }
 

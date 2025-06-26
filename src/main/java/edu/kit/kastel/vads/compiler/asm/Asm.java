@@ -30,7 +30,7 @@ import edu.kit.kastel.vads.compiler.asm.node.instruction.UnaryAsm;
 import edu.kit.kastel.vads.compiler.asm.node.instruction.UnaryOperator;
 import edu.kit.kastel.vads.compiler.asm.node.operand.RegAsm;
 import edu.kit.kastel.vads.compiler.asm.node.operand.RegType;
-import edu.kit.kastel.vads.compiler.asm.node.operand.StackAsm;
+import edu.kit.kastel.vads.compiler.asm.reg_alloc.RegAlloc;
 import edu.kit.kastel.vads.compiler.ir_tac.node.val.Constant;
 import edu.kit.kastel.vads.compiler.ir_tac.node.val.Val;
 import edu.kit.kastel.vads.compiler.ir_tac.node.val.Var;
@@ -41,25 +41,15 @@ import edu.kit.kastel.vads.compiler.asm.node.operand.PseudoAsm;
 
 public class Asm {
     private List<InstructionAsm> asmInstructions;
-    private int stackOffset = 0;
 
     public Asm(List<Instruction> irInstructions) {
         this.asmInstructions = new ArrayList<InstructionAsm>();
         for (Instruction irInstruction : irInstructions) {
             this.asmInstructions.addAll(generate(irInstruction));
         }
-        for (InstructionAsm instruction : this.asmInstructions) {
-            for (int i = 0; i < instruction.getOperands().size(); i++) {
-                OperandAsm operand = instruction.getOperands().get(i);
-                if (operand instanceof PseudoAsm) {
-                    this.stackOffset += 4;  
-                    instruction.setOperand(i, new StackAsm(this.stackOffset));
-                }
-            }
-        }
         // TODO: ir & asm don't know declarations....
         // So liveness should be done with syntax tree... OMG
-        // new RegAlloc(this.asmInstructions).allocate();
+        new RegAlloc(this.asmInstructions).allocate();
     }
 
     private List<InstructionAsm> generate(Instruction irInstruction) {

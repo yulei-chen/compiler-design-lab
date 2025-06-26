@@ -14,6 +14,6 @@ public class PseudoAsm implements OperandAsm {
 
     @Override
     public String toString() {
-        return '%' + identifier;
+        return identifier;
     }
 }
