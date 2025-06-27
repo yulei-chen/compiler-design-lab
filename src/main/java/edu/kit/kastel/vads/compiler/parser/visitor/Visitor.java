@@ -17,7 +17,7 @@ import edu.kit.kastel.vads.compiler.parser.ast.ReturnTree;
 import edu.kit.kastel.vads.compiler.parser.ast.TypeTree;
 import edu.kit.kastel.vads.compiler.parser.ast.WhileTree;
 import edu.kit.kastel.vads.compiler.parser.ast.ForTree;
-import edu.kit.kastel.vads.compiler.parser.ast.FunctionCall;
+import edu.kit.kastel.vads.compiler.parser.ast.FunctionCallTree;
 import edu.kit.kastel.vads.compiler.parser.ast.ContinueTree;
 import edu.kit.kastel.vads.compiler.parser.ast.BreakTree;
 import edu.kit.kastel.vads.compiler.parser.ast.ConditionalTree;
@@ -67,5 +67,5 @@ public interface Visitor<T, R> {
 
     R visit(ParamTree paramTree, T data);
 
-    R visit(FunctionCall functionCall, T data);
+    R visit(FunctionCallTree functionCall, T data);
 }

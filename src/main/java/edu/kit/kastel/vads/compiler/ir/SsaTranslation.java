@@ -8,7 +8,6 @@ import edu.kit.kastel.vads.compiler.ir.node.Phi;
 import edu.kit.kastel.vads.compiler.ir.optimize.Optimizer;
 import edu.kit.kastel.vads.compiler.ir.util.DebugInfo;
 import edu.kit.kastel.vads.compiler.ir.util.DebugInfoHelper;
-import edu.kit.kastel.vads.compiler.lexer.Operator.OperatorType;
 import edu.kit.kastel.vads.compiler.parser.ast.*;
 import edu.kit.kastel.vads.compiler.parser.symbol.Name;
 import edu.kit.kastel.vads.compiler.parser.visitor.Visitor;
@@ -439,7 +438,7 @@ public class SsaTranslation {
         }
 
         @Override
-        public Optional<Node> visit(FunctionCall functionCall, SsaTranslation data) {
+        public Optional<Node> visit(FunctionCallTree functionCall, SsaTranslation data) {
             return NOT_AN_EXPRESSION;
         }
 

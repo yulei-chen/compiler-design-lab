@@ -7,6 +7,7 @@ import java.util.OptionalLong;
 
 import edu.kit.kastel.vads.compiler.ir_tac.node.instruction.Binary;
 import edu.kit.kastel.vads.compiler.ir_tac.node.instruction.Copy;
+import edu.kit.kastel.vads.compiler.ir_tac.node.instruction.FunctionCall;
 import edu.kit.kastel.vads.compiler.ir_tac.node.instruction.Instruction;
 import edu.kit.kastel.vads.compiler.ir_tac.node.instruction.Jump;
 import edu.kit.kastel.vads.compiler.ir_tac.node.instruction.JumpIfNotZero;
@@ -28,6 +29,7 @@ import edu.kit.kastel.vads.compiler.parser.ast.ContinueTree;
 import edu.kit.kastel.vads.compiler.parser.ast.DeclarationTree;
 import edu.kit.kastel.vads.compiler.parser.ast.ExpressionTree;
 import edu.kit.kastel.vads.compiler.parser.ast.ForTree;
+import edu.kit.kastel.vads.compiler.parser.ast.FunctionCallTree;
 import edu.kit.kastel.vads.compiler.parser.ast.FunctionTree;
 import edu.kit.kastel.vads.compiler.parser.ast.IdentExpressionTree;
 import edu.kit.kastel.vads.compiler.parser.ast.IfTree;
@@ -77,6 +79,9 @@ public class IrTac {
                 }
                 case DeclarationTree declarationTree -> {
                     visitor.visit(declarationTree, data);
+                }
+                case FunctionCallTree functionCall -> {
+                    visitor.visit(functionCall, data);
                 }
 
                 /* control  */
@@ -170,6 +175,16 @@ public class IrTac {
                 Var dst = visitor.visit(declarationTree.name(), data);
                 this.instructions.add(new Copy(new Constant(OptionalLong.of(0)), dst));
             }
+        }
+
+        public void visit(FunctionCallTree functionCallTree, Map<String, String> data) {
+            List<Val> args = new ArrayList<>();
+            for (ExpressionTree argument : functionCallTree.arguments()) {
+                args.add(visitor.visit(argument, data));
+            }
+            String dst_name = Utils.makeTemp();
+            Var dst = new Var(dst_name);
+            this.instructions.add(new FunctionCall(functionCallTree.name().name().asString(), args, dst));
         }
 
         public void visit(IfTree ifTree, Map<String, String> data) {

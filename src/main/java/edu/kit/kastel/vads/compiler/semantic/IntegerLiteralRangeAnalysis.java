@@ -8,7 +8,7 @@ import edu.kit.kastel.vads.compiler.parser.ast.ConditionalTree;
 import edu.kit.kastel.vads.compiler.parser.ast.BreakTree;
 import edu.kit.kastel.vads.compiler.parser.ast.ContinueTree;
 import edu.kit.kastel.vads.compiler.parser.ast.ForTree;
-import edu.kit.kastel.vads.compiler.parser.ast.FunctionCall;
+import edu.kit.kastel.vads.compiler.parser.ast.FunctionCallTree;
 import edu.kit.kastel.vads.compiler.parser.ast.WhileTree;
 import edu.kit.kastel.vads.compiler.parser.visitor.NoOpVisitor;
 import edu.kit.kastel.vads.compiler.parser.visitor.Unit;
@@ -60,7 +60,7 @@ public class IntegerLiteralRangeAnalysis implements NoOpVisitor<Namespace<Void>>
     }
 
     @Override
-    public Unit visit(FunctionCall functionCall, Namespace<Void> data) {
+    public Unit visit(FunctionCallTree functionCall, Namespace<Void> data) {
         return Unit.INSTANCE;
     }
 

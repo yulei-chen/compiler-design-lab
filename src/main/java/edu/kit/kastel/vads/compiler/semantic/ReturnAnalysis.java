@@ -1,6 +1,6 @@
 package edu.kit.kastel.vads.compiler.semantic;
 
-import edu.kit.kastel.vads.compiler.parser.ast.FunctionCall;
+import edu.kit.kastel.vads.compiler.parser.ast.FunctionCallTree;
 import edu.kit.kastel.vads.compiler.parser.ast.FunctionTree;
 import edu.kit.kastel.vads.compiler.parser.ast.IfTree;
 import edu.kit.kastel.vads.compiler.parser.ast.ParamTree;
@@ -41,7 +41,7 @@ class ReturnAnalysis implements NoOpVisitor<ReturnAnalysis.ReturnState> {
     }
 
     @Override
-    public Unit visit(FunctionCall functionCall, ReturnState data) {
+    public Unit visit(FunctionCallTree functionCall, ReturnState data) {
         return Unit.INSTANCE;
     }
 

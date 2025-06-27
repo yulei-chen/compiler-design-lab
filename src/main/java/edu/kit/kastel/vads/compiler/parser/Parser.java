@@ -19,7 +19,7 @@ import edu.kit.kastel.vads.compiler.parser.ast.ContinueTree;
 import edu.kit.kastel.vads.compiler.parser.ast.DeclarationTree;
 import edu.kit.kastel.vads.compiler.parser.ast.ExpressionTree;
 import edu.kit.kastel.vads.compiler.parser.ast.ForTree;
-import edu.kit.kastel.vads.compiler.parser.ast.FunctionCall;
+import edu.kit.kastel.vads.compiler.parser.ast.FunctionCallTree;
 import edu.kit.kastel.vads.compiler.parser.ast.FunctionTree;
 import edu.kit.kastel.vads.compiler.parser.ast.IdentExpressionTree;
 import edu.kit.kastel.vads.compiler.parser.ast.IfTree;
@@ -169,7 +169,7 @@ public class Parser {
         } else {
             Identifier identifier = new Identifier(lValue.name().name().asString(), lValue.name().span());
             List<ExpressionTree> argumentList = parseArgumentList();
-            return new FunctionCall(name(identifier), argumentList);
+            return new FunctionCallTree(name(identifier), argumentList);
         }
     }
 
@@ -351,7 +351,7 @@ public class Parser {
     private StatementTree parseFunctionCall() {
         Identifier identifier = this.tokenSource.expectIdentifier();
         List<ExpressionTree> argumentList = parseArgumentList();
-        return new FunctionCall(name(identifier), argumentList);
+        return new FunctionCallTree(name(identifier), argumentList);
     }
 
     /**
@@ -568,7 +568,7 @@ public class Parser {
                 this.tokenSource.consume();
                 if (this.tokenSource.peek() instanceof Separator(var type, _) && type == SeparatorType.PAREN_OPEN) {
                     List<ExpressionTree> argumentList = parseArgumentList();
-                    yield new FunctionCall(name(ident), argumentList);
+                    yield new FunctionCallTree(name(ident), argumentList);
                 }
                 yield new IdentExpressionTree(name(ident));
             }

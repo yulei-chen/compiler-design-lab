@@ -4,7 +4,7 @@ public sealed interface StatementTree extends Tree permits
 /* simp (end with `;` ) */
 AssignmentTree, 
 DeclarationTree, 
-FunctionCall,
+FunctionCallTree,
 
 /* control  */
 IfTree, 

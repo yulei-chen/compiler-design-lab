@@ -9,7 +9,7 @@ import edu.kit.kastel.vads.compiler.parser.ast.ContinueTree;
 import edu.kit.kastel.vads.compiler.parser.ast.DeclarationTree;
 import edu.kit.kastel.vads.compiler.parser.ast.ExpressionTree;
 import edu.kit.kastel.vads.compiler.parser.ast.ForTree;
-import edu.kit.kastel.vads.compiler.parser.ast.FunctionCall;
+import edu.kit.kastel.vads.compiler.parser.ast.FunctionCallTree;
 import edu.kit.kastel.vads.compiler.parser.ast.FunctionTree;
 import edu.kit.kastel.vads.compiler.parser.ast.IdentExpressionTree;
 import edu.kit.kastel.vads.compiler.parser.ast.IfTree;
@@ -194,7 +194,7 @@ public class RecursivePostorderVisitor<T, R> implements Visitor<T, R> {
     }
 
     @Override
-    public R visit(FunctionCall functionCall, T data) {
+    public R visit(FunctionCallTree functionCall, T data) {
         R r = functionCall.name().accept(this, data);
         for (ExpressionTree argument : functionCall.arguments()) {
             r = argument.accept(this, accumulate(data, r));

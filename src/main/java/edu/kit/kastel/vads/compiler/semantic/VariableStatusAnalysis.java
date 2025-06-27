@@ -3,7 +3,7 @@ package edu.kit.kastel.vads.compiler.semantic;
 import edu.kit.kastel.vads.compiler.lexer.Operator;
 import edu.kit.kastel.vads.compiler.parser.ast.AssignmentTree;
 import edu.kit.kastel.vads.compiler.parser.ast.DeclarationTree;
-import edu.kit.kastel.vads.compiler.parser.ast.FunctionCall;
+import edu.kit.kastel.vads.compiler.parser.ast.FunctionCallTree;
 import edu.kit.kastel.vads.compiler.parser.ast.IdentExpressionTree;
 import edu.kit.kastel.vads.compiler.parser.ast.IfTree;
 import edu.kit.kastel.vads.compiler.parser.ast.LValueIdentTree;
@@ -95,7 +95,7 @@ class VariableStatusAnalysis implements NoOpVisitor<Namespace<VariableStatusAnal
     }
 
     @Override
-    public Unit visit(FunctionCall functionCall, Namespace<VariableStatus> data) {
+    public Unit visit(FunctionCallTree functionCall, Namespace<VariableStatus> data) {
         return Unit.INSTANCE;
     }
 

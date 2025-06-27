@@ -5,7 +5,7 @@ import java.util.List;
 import edu.kit.kastel.vads.compiler.Span;
 import edu.kit.kastel.vads.compiler.parser.visitor.Visitor;
 
-public record FunctionCall(NameTree name, List<ExpressionTree> arguments) implements StatementTree, ExpressionTree {
+public record FunctionCallTree(NameTree name, List<ExpressionTree> arguments) implements StatementTree, ExpressionTree {
     @Override
     public Span span() {
         return name().span();
