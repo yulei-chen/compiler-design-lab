@@ -7,7 +7,9 @@ import edu.kit.kastel.vads.compiler.parser.ast.BreakTree;
 import edu.kit.kastel.vads.compiler.parser.ast.ConditionalTree;
 import edu.kit.kastel.vads.compiler.parser.ast.ContinueTree;
 import edu.kit.kastel.vads.compiler.parser.ast.DeclarationTree;
+import edu.kit.kastel.vads.compiler.parser.ast.ExpressionTree;
 import edu.kit.kastel.vads.compiler.parser.ast.ForTree;
+import edu.kit.kastel.vads.compiler.parser.ast.FunctionCall;
 import edu.kit.kastel.vads.compiler.parser.ast.FunctionTree;
 import edu.kit.kastel.vads.compiler.parser.ast.IdentExpressionTree;
 import edu.kit.kastel.vads.compiler.parser.ast.IfTree;
@@ -15,6 +17,7 @@ import edu.kit.kastel.vads.compiler.parser.ast.LValueIdentTree;
 import edu.kit.kastel.vads.compiler.parser.ast.LiteralTree;
 import edu.kit.kastel.vads.compiler.parser.ast.NameTree;
 import edu.kit.kastel.vads.compiler.parser.ast.NegateTree;
+import edu.kit.kastel.vads.compiler.parser.ast.ParamTree;
 import edu.kit.kastel.vads.compiler.parser.ast.ProgramTree;
 import edu.kit.kastel.vads.compiler.parser.ast.ReturnTree;
 import edu.kit.kastel.vads.compiler.parser.ast.StatementTree;
@@ -187,6 +190,23 @@ public class RecursivePostorderVisitor<T, R> implements Visitor<T, R> {
     public R visit(UnaryOperationTree unaryOperationTree, T data) {
         R r = unaryOperationTree.operand().accept(this, data);
         r = this.visitor.visit(unaryOperationTree, accumulate(data, r));
+        return r;
+    }
+
+    @Override
+    public R visit(FunctionCall functionCall, T data) {
+        R r = functionCall.name().accept(this, data);
+        for (ExpressionTree argument : functionCall.arguments()) {
+            r = argument.accept(this, accumulate(data, r));
+        }
+        r = this.visitor.visit(functionCall, accumulate(data, r));
+        return r;
+    }
+
+    @Override
+    public R visit(ParamTree paramTree, T data) {
+        R r = paramTree.type().accept(this, data);
+        r = paramTree.name().accept(this, accumulate(data, r));
         return r;
     }
 

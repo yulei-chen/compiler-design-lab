@@ -1,7 +1,9 @@
 package edu.kit.kastel.vads.compiler.semantic;
 
+import edu.kit.kastel.vads.compiler.parser.ast.FunctionCall;
 import edu.kit.kastel.vads.compiler.parser.ast.FunctionTree;
 import edu.kit.kastel.vads.compiler.parser.ast.IfTree;
+import edu.kit.kastel.vads.compiler.parser.ast.ParamTree;
 import edu.kit.kastel.vads.compiler.parser.ast.ReturnTree;
 import edu.kit.kastel.vads.compiler.parser.visitor.NoOpVisitor;
 import edu.kit.kastel.vads.compiler.parser.visitor.Unit;
@@ -36,5 +38,15 @@ class ReturnAnalysis implements NoOpVisitor<ReturnAnalysis.ReturnState> {
             r = ifTree.elseStatement().accept(this, data);
         }
         return r;
+    }
+
+    @Override
+    public Unit visit(FunctionCall functionCall, ReturnState data) {
+        return Unit.INSTANCE;
+    }
+
+    @Override
+    public Unit visit(ParamTree paramTree, ReturnState data) {
+        return Unit.INSTANCE;
     }
 }

@@ -34,6 +34,11 @@ public class TokenSource {
         return this.tokens.get(this.idx);
     }
 
+    public Token peek(int offset) {
+        expectHasMore(offset);
+        return this.tokens.get(this.idx + offset);
+    }
+
     public Keyword expectKeyword(KeywordType type) {
         Token token = peek();
         if (!(token instanceof Keyword kw) || kw.type() != type) {
@@ -81,6 +86,12 @@ public class TokenSource {
 
     private void expectHasMore() {
         if (this.idx >= this.tokens.size()) {
+            throw new ParseException("reached end of file");
+        }
+    }
+
+    private void expectHasMore(int offset) {
+        if (this.idx + offset >= this.tokens.size()) {
             throw new ParseException("reached end of file");
         }
     }

@@ -438,6 +438,16 @@ public class SsaTranslation {
             return Optional.of(whileNode);
         }
 
+        @Override
+        public Optional<Node> visit(FunctionCall functionCall, SsaTranslation data) {
+            return NOT_AN_EXPRESSION;
+        }
+
+        @Override
+        public Optional<Node> visit(ParamTree paramTree, SsaTranslation data) {
+            return NOT_AN_EXPRESSION;
+        }
+
         private Node projResultDivMod(SsaTranslation data, Node divMod) {
             // make sure we actually have a div or a mod, as optimizations could
             // have changed it to something else already

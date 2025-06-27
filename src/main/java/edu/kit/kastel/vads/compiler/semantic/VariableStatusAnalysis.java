@@ -3,10 +3,12 @@ package edu.kit.kastel.vads.compiler.semantic;
 import edu.kit.kastel.vads.compiler.lexer.Operator;
 import edu.kit.kastel.vads.compiler.parser.ast.AssignmentTree;
 import edu.kit.kastel.vads.compiler.parser.ast.DeclarationTree;
+import edu.kit.kastel.vads.compiler.parser.ast.FunctionCall;
 import edu.kit.kastel.vads.compiler.parser.ast.IdentExpressionTree;
 import edu.kit.kastel.vads.compiler.parser.ast.IfTree;
 import edu.kit.kastel.vads.compiler.parser.ast.LValueIdentTree;
 import edu.kit.kastel.vads.compiler.parser.ast.NameTree;
+import edu.kit.kastel.vads.compiler.parser.ast.ParamTree;
 import edu.kit.kastel.vads.compiler.parser.visitor.NoOpVisitor;
 import edu.kit.kastel.vads.compiler.parser.visitor.Unit;
 import org.jspecify.annotations.Nullable;
@@ -90,6 +92,16 @@ class VariableStatusAnalysis implements NoOpVisitor<Namespace<VariableStatusAnal
         VariableStatus status = data.get(identExpressionTree.name());
         checkInitialized(identExpressionTree.name(), status);
         return NoOpVisitor.super.visit(identExpressionTree, data);
+    }
+
+    @Override
+    public Unit visit(FunctionCall functionCall, Namespace<VariableStatus> data) {
+        return Unit.INSTANCE;
+    }
+
+    @Override
+    public Unit visit(ParamTree paramTree, Namespace<VariableStatus> data) {
+        return Unit.INSTANCE;
     }
 
     enum VariableStatus {

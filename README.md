@@ -14,6 +14,7 @@ TODO
 - [ ] Functions
 - [x] Boolean
 - [x] Hexadecimal
+- [ ] Bit-wise op
 
 # Compiler Design
 

@@ -37,6 +37,7 @@ public class Lexer {
             case '{' -> separator(SeparatorType.BRACE_OPEN);
             case '}' -> separator(SeparatorType.BRACE_CLOSE);
             case ';' -> separator(SeparatorType.SEMICOLON);
+            case ',' -> separator(SeparatorType.COMMA);
             case '~' -> new Operator(OperatorType.COMPLEMENT, buildSpan(1));
             case '-' -> match('=') ? new Operator(OperatorType.ASSIGN_NEGATE, buildSpan(2)) : new Operator(OperatorType.NEGATE, buildSpan(1));
             case '+' -> match('=') ? new Operator(OperatorType.ASSIGN_PLUS, buildSpan(2)) : new Operator(OperatorType.PLUS, buildSpan(1));

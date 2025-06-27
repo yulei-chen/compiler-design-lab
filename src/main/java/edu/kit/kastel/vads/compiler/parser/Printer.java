@@ -59,7 +59,7 @@ public class Printer {
                 this.indentDepth--;
                 print("}");
             }
-            case FunctionTree(var returnType, var name, var body) -> {
+            case FunctionTree(var returnType, var name, var parameters, var body) -> {
                 printTree(returnType);
                 space();
                 printTree(name);
