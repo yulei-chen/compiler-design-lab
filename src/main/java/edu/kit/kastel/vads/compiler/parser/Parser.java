@@ -161,13 +161,16 @@ public class Parser {
         if (this.tokenSource.peek().isKeyword(KeywordType.INT) || this.tokenSource.peek().isKeyword(KeywordType.BOOL)) {
             return parseDeclaration();
         }
-        if (this.tokenSource.peek(1) instanceof Separator(var type, _) && type == SeparatorType.PAREN_OPEN) {
-            return parseFunctionCall();
+        LValueIdentTree lValue = parseLValue();
+        if (this.tokenSource.peek() instanceof Operator(var type, _) && (type == OperatorType.ASSIGN || type == OperatorType.ASSIGN_DIV || type == OperatorType.ASSIGN_NEGATE || type == OperatorType.ASSIGN_MOD || type == OperatorType.ASSIGN_MUL || type == OperatorType.ASSIGN_PLUS || type == OperatorType.ASSIGN_SHIFT_LEFT || type == OperatorType.ASSIGN_SHIFT_RIGHT || type == OperatorType.ASSIGN_AND || type == OperatorType.ASSIGN_XOR || type == OperatorType.ASSIGN_OR)) {
+            Operator assignmentOperator = parseAssignmentOperator();
+            ExpressionTree expression = parseExpression();
+            return new AssignmentTree(lValue, assignmentOperator, expression);
+        } else {
+            Identifier identifier = new Identifier(lValue.name().name().asString(), lValue.name().span());
+            List<ExpressionTree> argumentList = parseArgumentList();
+            return new FunctionCall(name(identifier), argumentList);
         }
-        LValueTree lValue = parseLValue();
-        Operator assignmentOperator = parseAssignmentOperator();
-        ExpressionTree expression = parseExpression();
-        return new AssignmentTree(lValue, assignmentOperator, expression);
     }
 
     /**
@@ -220,10 +223,10 @@ public class Parser {
     /**
      * lvalue → ident | "(" lvalue ")"
      */
-    private LValueTree parseLValue() {
+    private LValueIdentTree parseLValue() {
         if (this.tokenSource.peek().isSeparator(SeparatorType.PAREN_OPEN)) {
             this.tokenSource.expectSeparator(SeparatorType.PAREN_OPEN);
-            LValueTree inner = parseLValue();
+            LValueIdentTree inner = parseLValue();
             this.tokenSource.expectSeparator(SeparatorType.PAREN_CLOSE);
             return inner;
         }
