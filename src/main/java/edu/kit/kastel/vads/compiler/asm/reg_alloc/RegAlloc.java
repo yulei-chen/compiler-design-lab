@@ -43,6 +43,10 @@ public class RegAlloc {
         replaceTempByReg();
     }
 
+    public int stackOffset() {
+        return this.stackOffset;
+    }
+
     public InterferenceGraph buildInterferenceGraph() {
         Liveness liveness = new Liveness(asmInstructions);
         // liveness.backwardAnalyze();
@@ -88,7 +92,7 @@ public class RegAlloc {
 
             // If no color is available, use stack
             if (assigned == null) {
-                this.stackOffset += 4;   
+                this.stackOffset -= 4;   
                 StackAsm stack = new StackAsm(this.stackOffset);
                 this.allocation.put(temp, stack);
             } else {

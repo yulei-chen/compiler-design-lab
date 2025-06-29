@@ -9,6 +9,6 @@ public class StackAsm implements OperandAsm {
 
     @Override
     public String toString() {
-        return String.format("-%d(%%rsp)", this.offset);
+        return String.format("%d(%%rbp)", this.offset);
     }
 }

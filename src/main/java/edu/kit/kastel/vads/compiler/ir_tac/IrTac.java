@@ -7,6 +7,7 @@ import java.util.OptionalLong;
 
 import edu.kit.kastel.vads.compiler.ir_tac.node.instruction.Binary;
 import edu.kit.kastel.vads.compiler.ir_tac.node.instruction.Copy;
+import edu.kit.kastel.vads.compiler.ir_tac.node.instruction.Function;
 import edu.kit.kastel.vads.compiler.ir_tac.node.instruction.FunctionCall;
 import edu.kit.kastel.vads.compiler.ir_tac.node.instruction.Instruction;
 import edu.kit.kastel.vads.compiler.ir_tac.node.instruction.Jump;
@@ -46,27 +47,37 @@ import edu.kit.kastel.vads.compiler.parser.ast.WhileTree;
 /** Intermediate Representation - Three Address Code */
 public class IrTac {
     private final Visitor visitor;
+    private final List<List<Instruction>> instructionMatrix;
 
     public IrTac(ProgramTree program) {
+        this.instructionMatrix = new ArrayList<>();
         this.visitor = new Visitor();
         for (FunctionTree function : program.topLevelTrees()) {
-            visitor.visit(function);
+            List<Instruction> instructions = visitor.visit(function);
+            this.instructionMatrix.add(instructions);
         }
     }
 
-    public List<Instruction> instructions() {
-        return visitor.instructions;
+    public List<List<Instruction>> instructionMatrix() {
+        return this.instructionMatrix;
     }
 
     public class Visitor {
-        private final List<Instruction> instructions;
+        private List<Instruction> instructions;
 
-        public Visitor() {
+        public List<Instruction> visit(FunctionTree function) {
             this.instructions = new ArrayList<>();
-        }
+            
+            String functionName = function.name().name().asString();
+            if (functionName.equals("main")) {
+                this.instructions.add(new Function("_main", List.of()));
+                visitor.visit(function.body(), Map.of());
+            } else {
+                this.instructions.add(new Function(functionName, List.of()));
+                visitor.visit(function.body(), Map.of());
+            }
 
-        public void visit(FunctionTree function) {
-            visitor.visit(function.body(), Map.of());
+            return this.instructions;
         }
 
         ////// Statements Start //////

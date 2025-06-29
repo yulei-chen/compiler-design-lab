@@ -4,11 +4,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.OptionalLong;
 
+import edu.kit.kastel.vads.compiler.asm.node.instruction.AllocateStackAsm;
 import edu.kit.kastel.vads.compiler.asm.node.instruction.BinaryAsm;
 import edu.kit.kastel.vads.compiler.asm.node.instruction.BinaryOperator;
 import edu.kit.kastel.vads.compiler.asm.node.instruction.CdqAsm;
 import edu.kit.kastel.vads.compiler.asm.node.instruction.CmpAsm;
 import edu.kit.kastel.vads.compiler.asm.node.instruction.CondCode;
+import edu.kit.kastel.vads.compiler.asm.node.instruction.FunctionAsm;
 import edu.kit.kastel.vads.compiler.asm.node.instruction.IdivAsm;
 import edu.kit.kastel.vads.compiler.asm.node.instruction.InstructionAsm;
 import edu.kit.kastel.vads.compiler.asm.node.instruction.JmpAsm;
@@ -19,6 +21,7 @@ import edu.kit.kastel.vads.compiler.asm.node.instruction.RetAsm;
 import edu.kit.kastel.vads.compiler.asm.node.instruction.SetCCAsm;
 import edu.kit.kastel.vads.compiler.ir_tac.node.instruction.Binary;
 import edu.kit.kastel.vads.compiler.ir_tac.node.instruction.Copy;
+import edu.kit.kastel.vads.compiler.ir_tac.node.instruction.Function;
 import edu.kit.kastel.vads.compiler.ir_tac.node.instruction.Instruction;
 import edu.kit.kastel.vads.compiler.ir_tac.node.instruction.Jump;
 import edu.kit.kastel.vads.compiler.ir_tac.node.instruction.JumpIfNotZero;
@@ -49,11 +52,20 @@ public class Asm {
         }
         // TODO: ir & asm don't know declarations....
         // So liveness should be done with syntax tree... OMG
-        new RegAlloc(this.asmInstructions).allocate();
+        RegAlloc regAlloc = new RegAlloc(this.asmInstructions);
+        regAlloc.allocate();
+        // Add stackalloc instruction after first element(FunctionAsm)
+        int stackOffset = regAlloc.stackOffset();
+        if (stackOffset < 0) {
+            this.asmInstructions.add(1, new AllocateStackAsm(stackOffset));
+        }
     }
 
     private List<InstructionAsm> generate(Instruction irInstruction) {
         switch (irInstruction) {
+            case Function irFunction -> {
+                return generateFunction(irFunction);
+            }
             case Return irReturn -> {
                 return generateReturn(irReturn);
             }
@@ -80,6 +92,12 @@ public class Asm {
             }
             default -> throw new IllegalArgumentException("Unknown instruction type: " + irInstruction.getClass().getName());
         }
+    }
+
+    private List<InstructionAsm> generateFunction(Function irFunction) {
+        return List.of(
+            new FunctionAsm(irFunction.name())
+        );
     }
 
     private List<InstructionAsm> generateReturn(Return irReturn) {

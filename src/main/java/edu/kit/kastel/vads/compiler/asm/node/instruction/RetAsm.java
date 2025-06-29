@@ -10,7 +10,9 @@ public class RetAsm implements InstructionAsm {
 
     @Override
     public String toString() {
-        return "ret";
+        return "movq %rbp, %rsp\n" +
+        "popq %rbp\n" +
+        "ret";
     }
 
     @Override

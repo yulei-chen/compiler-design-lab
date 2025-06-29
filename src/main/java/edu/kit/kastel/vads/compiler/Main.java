@@ -9,6 +9,7 @@ import edu.kit.kastel.vads.compiler.ir.SsaTranslation;
 import edu.kit.kastel.vads.compiler.ir.optimize.LocalValueNumbering;
 import edu.kit.kastel.vads.compiler.ir.util.YCompPrinter;
 import edu.kit.kastel.vads.compiler.ir_tac.IrTac;
+import edu.kit.kastel.vads.compiler.ir_tac.node.instruction.Instruction;
 import edu.kit.kastel.vads.compiler.ir.util.GraphVizPrinter;
 import edu.kit.kastel.vads.compiler.lexer.Lexer;
 import edu.kit.kastel.vads.compiler.parser.ParseException;
@@ -44,20 +45,20 @@ public class Main {
        
 
         IrTac ir = new IrTac(program);
-        Asm asmAst = new Asm(ir.instructions());
-        String asm = asmAst.toString();
-        System.out.println(asm);
+        String asm = "";
+        for (List<Instruction> instructionsPerFunction : ir.instructionMatrix()) {
+            Asm asmAst = new Asm(instructionsPerFunction);
+            asm += asmAst.toString();
+        }
 
         String starter =    """
         .global main
-        .global _main
         .text
         main:
         call _main
         movq %rax, %rdi
         movq $0x3C, %rax
         syscall
-        _main:
         """;
 
 
