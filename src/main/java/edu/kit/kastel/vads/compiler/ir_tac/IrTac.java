@@ -71,7 +71,7 @@ public class IrTac {
             this.instructions = new ArrayList<>();
             
             String functionName = function.name().name().asString();
-            if (functionName.startsWith("main.")) {
+            if (functionName.equals("main")) {
                 this.instructions.add(new Function("_main", List.of()));
                 visitor.visit(function.body(), Map.of());
             } else {

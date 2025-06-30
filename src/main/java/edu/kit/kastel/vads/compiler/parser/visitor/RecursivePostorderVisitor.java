@@ -76,11 +76,12 @@ public class RecursivePostorderVisitor<T, R> implements Visitor<T, R> {
 
     @Override
     public R visit(FunctionTree functionTree, T data) {
-        R r = functionTree.returnType().accept(this, data);
-        r = functionTree.name().accept(this, accumulate(data, r));
+        // NOTE: the order cannot be changed!
+        R r = functionTree.name().accept(this, data);
         for (ParamTree param : functionTree.parameters()) {
             r = param.accept(this, accumulate(data, r));
         }
+        r = functionTree.returnType().accept(this, data);
         r = functionTree.body().accept(this, accumulate(data, r));
         r = this.visitor.visit(functionTree, accumulate(data, r));
         return r;
