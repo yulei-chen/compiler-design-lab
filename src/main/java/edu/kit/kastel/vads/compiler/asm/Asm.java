@@ -7,9 +7,11 @@ import java.util.OptionalLong;
 import edu.kit.kastel.vads.compiler.asm.node.instruction.AllocateStackAsm;
 import edu.kit.kastel.vads.compiler.asm.node.instruction.BinaryAsm;
 import edu.kit.kastel.vads.compiler.asm.node.instruction.BinaryOperator;
+import edu.kit.kastel.vads.compiler.asm.node.instruction.CallAsm;
 import edu.kit.kastel.vads.compiler.asm.node.instruction.CdqAsm;
 import edu.kit.kastel.vads.compiler.asm.node.instruction.CmpAsm;
 import edu.kit.kastel.vads.compiler.asm.node.instruction.CondCode;
+import edu.kit.kastel.vads.compiler.asm.node.instruction.DeallocateStackAsm;
 import edu.kit.kastel.vads.compiler.asm.node.instruction.FunctionAsm;
 import edu.kit.kastel.vads.compiler.asm.node.instruction.IdivAsm;
 import edu.kit.kastel.vads.compiler.asm.node.instruction.InstructionAsm;
@@ -17,11 +19,13 @@ import edu.kit.kastel.vads.compiler.asm.node.instruction.JmpAsm;
 import edu.kit.kastel.vads.compiler.asm.node.instruction.JmpCCAsm;
 import edu.kit.kastel.vads.compiler.asm.node.instruction.LabelAsm;
 import edu.kit.kastel.vads.compiler.asm.node.instruction.MovAsm;
+import edu.kit.kastel.vads.compiler.asm.node.instruction.Push;
 import edu.kit.kastel.vads.compiler.asm.node.instruction.RetAsm;
 import edu.kit.kastel.vads.compiler.asm.node.instruction.SetCCAsm;
 import edu.kit.kastel.vads.compiler.ir_tac.node.instruction.Binary;
 import edu.kit.kastel.vads.compiler.ir_tac.node.instruction.Copy;
 import edu.kit.kastel.vads.compiler.ir_tac.node.instruction.Function;
+import edu.kit.kastel.vads.compiler.ir_tac.node.instruction.FunctionCall;
 import edu.kit.kastel.vads.compiler.ir_tac.node.instruction.Instruction;
 import edu.kit.kastel.vads.compiler.ir_tac.node.instruction.Jump;
 import edu.kit.kastel.vads.compiler.ir_tac.node.instruction.JumpIfNotZero;
@@ -33,6 +37,7 @@ import edu.kit.kastel.vads.compiler.asm.node.instruction.UnaryAsm;
 import edu.kit.kastel.vads.compiler.asm.node.instruction.UnaryOperator;
 import edu.kit.kastel.vads.compiler.asm.node.operand.RegAsm;
 import edu.kit.kastel.vads.compiler.asm.node.operand.RegType;
+import edu.kit.kastel.vads.compiler.asm.node.operand.StackAsm;
 import edu.kit.kastel.vads.compiler.asm.reg_alloc.RegAlloc;
 import edu.kit.kastel.vads.compiler.ir_tac.node.val.Constant;
 import edu.kit.kastel.vads.compiler.ir_tac.node.val.Val;
@@ -44,8 +49,18 @@ import edu.kit.kastel.vads.compiler.asm.node.operand.PseudoAsm;
 
 public class Asm {
     private List<InstructionAsm> asmInstructions;
+    private List<RegAsm> ARG_REGS;
 
     public Asm(List<Instruction> irInstructions) {
+        this.ARG_REGS = List.of(
+            new RegAsm(RegType.DI),
+            new RegAsm(RegType.SI),
+            new RegAsm(RegType.DX),
+            new RegAsm(RegType.CX),
+            new RegAsm(RegType.R8),
+            new RegAsm(RegType.R9)
+        );
+
         this.asmInstructions = new ArrayList<InstructionAsm>();
         for (Instruction irInstruction : irInstructions) {
             this.asmInstructions.addAll(generate(irInstruction));
@@ -57,7 +72,7 @@ public class Asm {
         // Add stackalloc instruction after first element(FunctionAsm)
         int stackOffset = regAlloc.stackOffset();
         if (stackOffset < 0) {
-            this.asmInstructions.add(1, new AllocateStackAsm(stackOffset));
+            this.asmInstructions.add(1, new AllocateStackAsm(-stackOffset));
         }
     }
 
@@ -90,14 +105,29 @@ public class Asm {
             case Label irLabel -> {
                 return generateLabel(irLabel);
             }
+            case FunctionCall irFunctionCall -> {
+                return generateFunctionCall(irFunctionCall);
+            }    
             default -> throw new IllegalArgumentException("Unknown instruction type: " + irInstruction.getClass().getName());
         }
     }
 
     private List<InstructionAsm> generateFunction(Function irFunction) {
-        return List.of(
-            new FunctionAsm(irFunction.name())
-        );
+        List<InstructionAsm> instructions = List.of(new FunctionAsm(irFunction.name()));
+
+        List<Var> parameters = irFunction.parameters();
+        int paramSize = parameters.size();
+
+        for (int i = 0; i < Math.min(paramSize, 6); i++) {
+            instructions.add(new MovAsm(ARG_REGS.get(i), generateOperand(parameters.get(i))));
+        }
+
+        for (int i = 6; i < paramSize; i++) {
+            int offset = i - 4;
+            instructions.add(new MovAsm(new StackAsm(8 * offset), generateOperand(parameters.get(i))));
+        }
+
+        return instructions;
     }
 
     private List<InstructionAsm> generateReturn(Return irReturn) {
@@ -297,6 +327,61 @@ public class Asm {
         return List.of(
             new LabelAsm(irLabel.name())
         );
+    }
+
+    private List<InstructionAsm> generateFunctionCall(FunctionCall irFunctionCall) {
+        List<InstructionAsm> instructions = new ArrayList<>();
+        List<Val> args = irFunctionCall.args();
+        String functionName = irFunctionCall.name();
+
+        List<Val> registerArgs = new ArrayList<>();
+        List<Val> stackArgs = new ArrayList<>();
+
+        if (args.size() > 6) {
+            // `registerArgs` is the first 6 args
+            registerArgs.addAll(args.subList(0, 6));
+            // `stackArgs` is the rest
+            stackArgs.addAll(args.subList(6, args.size()));
+        } else {
+            // `registerArgs` is the first 6 args
+            registerArgs.addAll(args.subList(0, args.size()));
+        }
+        
+        int stackPadding = 0;
+        if (stackArgs.size() % 2 == 1) {
+            stackPadding = 8;
+            instructions.add(new AllocateStackAsm(stackPadding));
+        }
+
+        // Move register arguments to registers
+        for (int i = 0; i < registerArgs.size(); i++) {
+            instructions.add(new MovAsm(generateOperand(registerArgs.get(i)), ARG_REGS.get(i)));
+        }
+        // Move stack arguments to stack in reverse order
+        for (int i = stackArgs.size() - 1; i >= 0; i--) {
+            Val stackArg = stackArgs.get(i);
+            OperandAsm arg = generateOperand(stackArg);
+            if (arg instanceof RegAsm || arg instanceof ImmAsm) {
+                instructions.add(new Push(arg));
+            } else {
+                instructions.add(new MovAsm(arg, new RegAsm(RegType.AX)));
+                instructions.add(new Push(new RegAsm(RegType.AX)));
+            }
+        }
+        // Call the function
+        instructions.add(new CallAsm(functionName));
+        
+        // Adjust stack pointer
+        int bytesToRemove = 8 * stackArgs.size() + stackPadding;
+        if (bytesToRemove != 0) {
+            instructions.add(new DeallocateStackAsm(bytesToRemove));
+        }
+
+        // Retrieve return value
+        OperandAsm dst = generateOperand(irFunctionCall.dst());
+        instructions.add(new MovAsm(new RegAsm(RegType.AX), dst));
+
+        return instructions;
     }
 
     @Override

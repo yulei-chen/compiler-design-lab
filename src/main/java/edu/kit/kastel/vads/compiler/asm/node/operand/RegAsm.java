@@ -11,6 +11,10 @@ public class RegAsm implements OperandAsm {
         return reg.toOneByteString();
     }
 
+    public String to8ByteString() {
+        return reg.to8ByteString();
+    }
+
     @Override
     public String toString() {
         return reg.toString();

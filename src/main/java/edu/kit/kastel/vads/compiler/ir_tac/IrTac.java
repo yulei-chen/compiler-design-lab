@@ -38,11 +38,13 @@ import edu.kit.kastel.vads.compiler.parser.ast.LValueIdentTree;
 import edu.kit.kastel.vads.compiler.parser.ast.LValueTree;
 import edu.kit.kastel.vads.compiler.parser.ast.LiteralTree;
 import edu.kit.kastel.vads.compiler.parser.ast.NameTree;
+import edu.kit.kastel.vads.compiler.parser.ast.ParamTree;
 import edu.kit.kastel.vads.compiler.parser.ast.ProgramTree;
 import edu.kit.kastel.vads.compiler.parser.ast.ReturnTree;
 import edu.kit.kastel.vads.compiler.parser.ast.StatementTree;
 import edu.kit.kastel.vads.compiler.parser.ast.UnaryOperationTree;
 import edu.kit.kastel.vads.compiler.parser.ast.WhileTree;
+import edu.kit.kastel.vads.compiler.parser.symbol.Name;
 
 /** Intermediate Representation - Three Address Code */
 public class IrTac {
@@ -73,7 +75,12 @@ public class IrTac {
                 this.instructions.add(new Function("_main", List.of()));
                 visitor.visit(function.body(), Map.of());
             } else {
-                this.instructions.add(new Function(functionName, List.of()));
+                List<Var> parameters = new ArrayList<>();
+                for (ParamTree param : function.parameters()) {
+                    String paramName = param.name().name().asString();
+                    parameters.add(new Var(paramName));
+                }
+                this.instructions.add(new Function(functionName, parameters));
                 visitor.visit(function.body(), Map.of());
             }
 

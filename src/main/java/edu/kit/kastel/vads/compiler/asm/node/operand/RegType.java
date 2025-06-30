@@ -112,4 +112,52 @@ public enum RegType {
         }
         throw new IllegalStateException();
     }
+
+    public String to8ByteString() {
+        switch (this) {
+            case AX -> {
+                return "%rax";
+            }
+            case BX -> {
+                return "%rbx";
+            }
+            case CX -> {
+                return "%rcx";
+            }
+            case DX -> {
+                return "%rdx";
+            }
+            case SI -> {
+                return "%rsi";
+            }
+            case DI -> {
+                return "%rdi";
+            }
+            case R8 -> {
+                return "%r8";
+            }
+            case R9 -> {
+                return "%r9";
+            }
+            case R10 -> {
+                return "%r10";
+            }
+            case R11 -> {
+                return "%r11";
+            }
+            case R12 -> {
+                return "%r12";
+            }
+            case R13 -> {
+                return "%r13";
+            }
+            case R14 -> {
+                return "%r14";
+            }
+            case R15 -> {
+                return "%r15";
+            }
+        }
+        throw new IllegalStateException();
+    }
 }
