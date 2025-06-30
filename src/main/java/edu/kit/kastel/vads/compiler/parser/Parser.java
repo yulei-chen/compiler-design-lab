@@ -360,12 +360,15 @@ public class Parser {
      * @return
      */
     private StatementTree parseFunctionCall(KeywordType buildInFunctionName) {
-        Identifier identifier = this.tokenSource.expectIdentifier();
-        List<ExpressionTree> argumentList = parseArgumentList();
         if (buildInFunctionName != null) {
-            return new FunctionCallTree(new NameTree(new KeywordName(buildInFunctionName), identifier.span()), argumentList);
+            this.tokenSource.expectKeyword(buildInFunctionName);
+            List<ExpressionTree> argumentList = parseArgumentList();
+            return new FunctionCallTree(new NameTree(new KeywordName(buildInFunctionName), this.tokenSource.peek().span()), argumentList);
+        } else {
+            Identifier identifier = this.tokenSource.expectIdentifier();
+            List<ExpressionTree> argumentList = parseArgumentList();
+            return new FunctionCallTree(name(identifier), argumentList);
         }
-        return new FunctionCallTree(name(identifier), argumentList);
     }
 
     /**
