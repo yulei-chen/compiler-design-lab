@@ -17,6 +17,7 @@ public class SemanticAnalysis {
         this.program.accept(new RecursivePostorderVisitor<>(new IntegerLiteralRangeAnalysis()), new Namespace<>());
         this.program.accept(new RecursivePostorderVisitor<>(new VariableRename()), new HashMap<String, String>());
         this.program.accept(new RecursivePostorderVisitor<>(new VariableStatusAnalysis()), new Namespace<>());
+        this.program.accept(new RecursivePostorderVisitor<>(new TypeCheckingAnalysis()), new TypeCheckingAnalysis.TypeCheckingState());
         this.program.accept(new RecursivePostorderVisitor<>(new ReturnAnalysis()), new ReturnAnalysis.ReturnState());
     }
 
