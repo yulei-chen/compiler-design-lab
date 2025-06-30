@@ -1,6 +1,7 @@
 package edu.kit.kastel.vads.compiler;
 
 import edu.kit.kastel.vads.compiler.asm.Asm;
+import edu.kit.kastel.vads.compiler.asm.node.build_in_funcs.PrintAsm;
 import edu.kit.kastel.vads.compiler.backend.aasm.CodeGenerator;
 import edu.kit.kastel.vads.compiler.backend.regalloc.GraphColoringRegisterAllocator;
 import edu.kit.kastel.vads.compiler.backend.regalloc.AasmToAttAsmTranslator;
@@ -50,6 +51,7 @@ public class Main {
             Asm asmAst = new Asm(instructionsPerFunction);
             asm += asmAst.toString();
         }
+        asm += new PrintAsm().toString();
         System.out.println(asm);
 
         String starter =    """
