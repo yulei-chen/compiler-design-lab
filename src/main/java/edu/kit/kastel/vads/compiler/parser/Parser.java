@@ -24,18 +24,16 @@ import edu.kit.kastel.vads.compiler.parser.ast.FunctionTree;
 import edu.kit.kastel.vads.compiler.parser.ast.IdentExpressionTree;
 import edu.kit.kastel.vads.compiler.parser.ast.IfTree;
 import edu.kit.kastel.vads.compiler.parser.ast.LValueIdentTree;
-import edu.kit.kastel.vads.compiler.parser.ast.LValueTree;
 import edu.kit.kastel.vads.compiler.parser.ast.LiteralTree;
 import edu.kit.kastel.vads.compiler.parser.ast.NameTree;
-import edu.kit.kastel.vads.compiler.parser.ast.NegateTree;
 import edu.kit.kastel.vads.compiler.parser.ast.ParamTree;
 import edu.kit.kastel.vads.compiler.parser.ast.ProgramTree;
 import edu.kit.kastel.vads.compiler.parser.ast.ReturnTree;
 import edu.kit.kastel.vads.compiler.parser.ast.StatementTree;
-import edu.kit.kastel.vads.compiler.parser.ast.Tree;
 import edu.kit.kastel.vads.compiler.parser.ast.TypeTree;
 import edu.kit.kastel.vads.compiler.parser.ast.UnaryOperationTree;
 import edu.kit.kastel.vads.compiler.parser.ast.WhileTree;
+import edu.kit.kastel.vads.compiler.parser.symbol.KeywordName;
 import edu.kit.kastel.vads.compiler.parser.symbol.Name;
 import edu.kit.kastel.vads.compiler.parser.type.BasicType;
 
@@ -161,6 +159,19 @@ public class Parser {
         if (this.tokenSource.peek().isKeyword(KeywordType.INT) || this.tokenSource.peek().isKeyword(KeywordType.BOOL)) {
             return parseDeclaration();
         }
+
+        if (this.tokenSource.peek().isKeyword(KeywordType.PRINT)) {
+            return parseFunctionCall(KeywordType.PRINT);
+        }
+
+        // if (this.tokenSource.peek().isKeyword(KeywordType.READ)) {
+        //     return parseReadFunctionCall();
+        // }
+
+        // if (this.tokenSource.peek().isKeyword(KeywordType.FLUSH)) {
+        //     return parseFlushFunctionCall();
+        // }
+        
         LValueIdentTree lValue = parseLValue();
         if (this.tokenSource.peek() instanceof Operator(var type, _) && (type == OperatorType.ASSIGN || type == OperatorType.ASSIGN_DIV || type == OperatorType.ASSIGN_NEGATE || type == OperatorType.ASSIGN_MOD || type == OperatorType.ASSIGN_MUL || type == OperatorType.ASSIGN_PLUS || type == OperatorType.ASSIGN_SHIFT_LEFT || type == OperatorType.ASSIGN_SHIFT_RIGHT || type == OperatorType.ASSIGN_AND || type == OperatorType.ASSIGN_XOR || type == OperatorType.ASSIGN_OR)) {
             Operator assignmentOperator = parseAssignmentOperator();
@@ -348,9 +359,12 @@ public class Parser {
      * function-call → ident arg-list
      * @return
      */
-    private StatementTree parseFunctionCall() {
+    private StatementTree parseFunctionCall(KeywordType buildInFunctionName) {
         Identifier identifier = this.tokenSource.expectIdentifier();
         List<ExpressionTree> argumentList = parseArgumentList();
+        if (buildInFunctionName != null) {
+            return new FunctionCallTree(new NameTree(new KeywordName(buildInFunctionName), identifier.span()), argumentList);
+        }
         return new FunctionCallTree(name(identifier), argumentList);
     }
 
