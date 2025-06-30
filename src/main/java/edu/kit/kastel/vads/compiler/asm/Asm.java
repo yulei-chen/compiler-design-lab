@@ -113,7 +113,8 @@ public class Asm {
     }
 
     private List<InstructionAsm> generateFunction(Function irFunction) {
-        List<InstructionAsm> instructions = List.of(new FunctionAsm(irFunction.name()));
+        List<InstructionAsm> instructions = new ArrayList<>();
+        instructions.add(new FunctionAsm(irFunction.name()));
 
         List<Var> parameters = irFunction.parameters();
         int paramSize = parameters.size();

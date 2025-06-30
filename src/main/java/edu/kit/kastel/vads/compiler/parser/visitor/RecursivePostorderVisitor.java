@@ -78,6 +78,9 @@ public class RecursivePostorderVisitor<T, R> implements Visitor<T, R> {
     public R visit(FunctionTree functionTree, T data) {
         R r = functionTree.returnType().accept(this, data);
         r = functionTree.name().accept(this, accumulate(data, r));
+        for (ParamTree param : functionTree.parameters()) {
+            r = param.accept(this, accumulate(data, r));
+        }
         r = functionTree.body().accept(this, accumulate(data, r));
         r = this.visitor.visit(functionTree, accumulate(data, r));
         return r;
@@ -207,6 +210,7 @@ public class RecursivePostorderVisitor<T, R> implements Visitor<T, R> {
     public R visit(ParamTree paramTree, T data) {
         R r = paramTree.type().accept(this, data);
         r = paramTree.name().accept(this, accumulate(data, r));
+        r = this.visitor.visit(paramTree, accumulate(data, r));
         return r;
     }
 

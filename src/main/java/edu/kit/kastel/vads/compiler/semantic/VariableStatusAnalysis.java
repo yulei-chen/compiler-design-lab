@@ -101,6 +101,7 @@ class VariableStatusAnalysis implements NoOpVisitor<Namespace<VariableStatusAnal
 
     @Override
     public Unit visit(ParamTree paramTree, Namespace<VariableStatus> data) {
+        updateStatus(data, VariableStatus.INITIALIZED, paramTree.name());
         return Unit.INSTANCE;
     }
 
