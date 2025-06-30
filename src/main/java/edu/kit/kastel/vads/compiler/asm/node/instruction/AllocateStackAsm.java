@@ -23,6 +23,6 @@ public class AllocateStackAsm implements InstructionAsm {
 
     @Override
     public String toString() {
-        return "subq $" + stackOffset + ", %rsp";
+        return "subq $" + (-stackOffset) + ", %rsp";
     }
 }

@@ -50,6 +50,7 @@ public class Main {
             Asm asmAst = new Asm(instructionsPerFunction);
             asm += asmAst.toString();
         }
+        System.out.println(asm);
 
         String starter =    """
         .global main

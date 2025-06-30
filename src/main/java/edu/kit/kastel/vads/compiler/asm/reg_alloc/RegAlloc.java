@@ -21,8 +21,6 @@ public class RegAlloc {
 
     private int stackOffset = 0;
     private final RegAsm[] AVAILABLE_REGS = {
-        new RegAsm(RegType.R8),
-        new RegAsm(RegType.R9),
         new RegAsm(RegType.R10),
         new RegAsm(RegType.R11),
         new RegAsm(RegType.R12),
