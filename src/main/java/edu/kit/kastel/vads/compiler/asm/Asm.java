@@ -275,6 +275,21 @@ public class Asm {
             case MUL -> {
                 return BinaryOperator.MUL;
             }
+            case BIT_AND -> {
+                return BinaryOperator.BIT_AND;
+            }
+            case BIT_OR -> {
+                return BinaryOperator.BIT_OR;
+            }
+            case BIT_XOR -> {
+                return BinaryOperator.BIT_XOR;
+            }
+            case SHIFT_LEFT -> {
+                return BinaryOperator.SHIFT_LEFT;
+            }
+            case SHIFT_RIGHT -> {
+                return BinaryOperator.SHIFT_RIGHT;
+            }
             default -> throw new IllegalArgumentException("Unknown binary operator: " + irOperator.getClass().getName());
         }
     }

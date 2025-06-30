@@ -162,7 +162,19 @@ public class IrTac {
                     this.instructions.add(new Binary(OperatorType.MOD, lhs, rhs, lhs));
                 }
                 case ASSIGN_AND -> {
-                    this.instructions.add(new Binary(OperatorType.AND, lhs, rhs, lhs));
+                    this.instructions.add(new Binary(OperatorType.BIT_AND, lhs, rhs, lhs));
+                }
+                case ASSIGN_OR -> {
+                    this.instructions.add(new Binary(OperatorType.BIT_OR, lhs, rhs, lhs));
+                }
+                case ASSIGN_XOR -> {
+                    this.instructions.add(new Binary(OperatorType.BIT_XOR, lhs, rhs, lhs));
+                }
+                case ASSIGN_SHIFT_LEFT -> {
+                    this.instructions.add(new Binary(OperatorType.SHIFT_LEFT, lhs, rhs, lhs));
+                }
+                case ASSIGN_SHIFT_RIGHT -> {
+                    this.instructions.add(new Binary(OperatorType.SHIFT_RIGHT, lhs, rhs, lhs));
                 }
                 default -> {
                     throw new IllegalArgumentException("Unknown assignment operator: " + operatorType);
