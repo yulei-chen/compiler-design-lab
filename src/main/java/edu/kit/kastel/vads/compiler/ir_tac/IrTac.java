@@ -195,7 +195,7 @@ public class IrTac {
             }
         }
 
-        public void visit(FunctionCallTree functionCallTree, Map<String, String> data) {
+        public Val visit(FunctionCallTree functionCallTree, Map<String, String> data) {
             List<Val> args = new ArrayList<>();
             for (ExpressionTree argument : functionCallTree.arguments()) {
                 args.add(visitor.visit(argument, data));
@@ -203,6 +203,7 @@ public class IrTac {
             String dst_name = Utils.makeTemp();
             Var dst = new Var(dst_name);
             this.instructions.add(new FunctionCall(functionCallTree.name().name().asString(), args, dst));
+            return dst;
         }
 
         public void visit(IfTree ifTree, Map<String, String> data) {
@@ -298,6 +299,9 @@ public class IrTac {
                 }
                 case ConditionalTree conditionalTree -> {
                     return visitor.visit(conditionalTree, data);
+                }
+                case FunctionCallTree functionCallTree -> {
+                    return visitor.visit(functionCallTree, data);
                 }
                 default -> throw new IllegalArgumentException("Unknown expression type: " + expressionTree.getClass().getName());
             }
