@@ -8,7 +8,6 @@ import edu.kit.kastel.vads.compiler.asm.node.instruction.AllocateStackAsm;
 import edu.kit.kastel.vads.compiler.asm.node.instruction.BinaryAsm;
 import edu.kit.kastel.vads.compiler.asm.node.instruction.BinaryOperator;
 import edu.kit.kastel.vads.compiler.asm.node.instruction.CallAsm;
-import edu.kit.kastel.vads.compiler.asm.node.instruction.CallPrintf;
 import edu.kit.kastel.vads.compiler.asm.node.instruction.CdqAsm;
 import edu.kit.kastel.vads.compiler.asm.node.instruction.CmpAsm;
 import edu.kit.kastel.vads.compiler.asm.node.instruction.CondCode;
@@ -371,7 +370,7 @@ public class Asm {
             }
         }
         // Call the function
-        callFunction(instructions, functionName);
+        instructions.add(new CallAsm(functionName));
         
         // Adjust stack pointer
         int bytesToRemove = 8 * stackArgs.size() + stackPadding;
@@ -384,14 +383,6 @@ public class Asm {
         instructions.add(new MovAsm(new RegAsm(RegType.AX), dst));
 
         return instructions;
-    }
-
-    private void callFunction(List<InstructionAsm> instructions, String functionName) {
-        if (functionName.equals("print")) {
-            instructions.add(new CallPrintf());
-        } else {
-            instructions.add(new CallAsm(functionName));
-        }
     }
 
     @Override
